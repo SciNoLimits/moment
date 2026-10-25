@@ -19,5 +19,51 @@
 
   <!-- Robotic arm and gripper -->
   <xacro:open_manipulator_x prefix=""/>
+  <!-- ROS 2 Control: MuJoCo hardware interface -->
+  <ros2_control name="MujocoSystem" type="system">
+    <hardware>
+      <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
 
+      <param name="mujoco_model">$(find moment_mujoco)/models/moment_scene.xml</param>
+      <param name="headless">false</param>
+      <param name="sim_speed_factor">1.0</param>
+    </hardware>
+
+    <!-- Robotic arm -->
+    <joint name="joint1">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="joint2">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="joint3">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="joint4">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <!-- Gripper: command the left finger only. MuJoCo's equality constraint couples the right finger. -->
+    <joint name="gripper_left_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+  </ros2_control>
 </robot>
