@@ -1,4 +1,4 @@
-# A-G2-Autonomous_Mobile_Manipulator
+# A-G2-Autonomous_Mobile_Manipulator (ROS2 Case Study Project)
 
 ## MOMENT: Mobile Manipulation for Exploration, Navigation, and Transport
 
