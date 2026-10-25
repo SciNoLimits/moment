@@ -1,6 +1,6 @@
 from launch import LaunchDescription
-from launch.actions import RegisterEventHandler
-from launch.event_handlers import OnProcessExit
+# from launch.actions import RegisterEventHandler
+# from launch.event_handlers import OnProcessExit
 from launch.substitutions import Command
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -21,6 +21,12 @@ def generate_launch_description():
         description_share,
         "config",
         "moment_controllers.yaml",
+    ])
+
+    plugins_file = PathJoinSubstitution([
+        description_share,
+        "config",
+        "mujoco_ros2_control_plugins.yaml",
     ])
 
     robot_description = {
@@ -50,6 +56,7 @@ def generate_launch_description():
         parameters=[
             {"use_sim_time": True},
             controllers_file,
+            plugins_file,
         ],
     )
 
