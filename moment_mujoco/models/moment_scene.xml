@@ -111,28 +111,28 @@
     </body>
   </worldbody>
   <actuator>
-    <position name="joint1_position"
-              joint="joint1"
-              kp="10"
-              ctrlrange="-2.82743 2.82743"
-              forcerange="-1 1"/>
-
-    <position name="joint2_position"
-              joint="joint2"
-              kp="10"
-              ctrlrange="-1.79071 1.57080"
-              forcerange="-1 1"/>
-
-    <position name="joint3_position"
-              joint="joint3"
-              kp="10"
-              ctrlrange="-0.94248 1.38230"
-              forcerange="-1 1"/>
-
-    <position name="joint4_position"
-              joint="joint4"
-              kp="10"
-              ctrlrange="-1.79071 2.04204"
-              forcerange="-1 1"/>
+    <!--  Wheel motor controls: ctrl is desired wheel torque in N m.  -->
+    <motor name="left_wheel_motor" joint="wheel_left_joint" gear="1" ctrllimited="true" ctrlrange="-2 2" forcelimited="true" forcerange="-2 2"/>
+    <motor name="right_wheel_motor" joint="wheel_right_joint" gear="1" ctrllimited="true" ctrlrange="-2 2" forcelimited="true" forcerange="-2 2"/>
+    <!--  Arm position controls: ctrl is target joint angle in radians.  -->
+    <position name="joint1_position" joint="joint1" kp="20" ctrlrange="-2.82743 2.82743" forcelimited="true" forcerange="-1 1"/>
+    <position name="joint2_position" joint="joint2" kp="20" ctrlrange="-1.79071 1.5708" forcelimited="true" forcerange="-1 1"/>
+    <position name="joint3_position" joint="joint3" kp="15" ctrlrange="-0.942478 1.3823" forcelimited="true" forcerange="-1 1"/>
+    <position name="joint4_position" joint="joint4" kp="10" ctrlrange="-1.79071 2.04204" forcelimited="true" forcerange="-1 1"/>
+    <!--  The equality constraint couples the two gripper slides.  -->
+    <position name="gripper_position" joint="gripper_left_joint" kp="100" ctrlrange="-0.01 0.019" forcerange="-1 1"/>
   </actuator>
+  <equality>
+    <joint name="gripper_coupling" joint1="gripper_right_joint" joint2="gripper_left_joint" polycoef="0 1 0 0 0"/>
+  </equality>
+  <sensor>
+    <jointpos name="joint1_angle" joint="joint1"/>
+    <jointpos name="joint2_angle" joint="joint2"/>
+    <jointpos name="joint3_angle" joint="joint3"/>
+    <jointpos name="joint4_angle" joint="joint4"/>
+    <jointpos name="gripper_opening" joint="gripper_left_joint"/>
+
+    <framepos name="base_position" objtype="site" objname="base_link"/>
+    <framepos name="gripper_position_sensor" objtype="site" objname="end_effector_link"/>
+  </sensor>
 </mujoco>

@@ -25,3 +25,14 @@ Thumbs.db
 *.tmp
 *.swp
 *~
+
+# MuJoCo runtime logs and debug files
+MUJOCO_LOG.TXT
+MJDATA.TXT
+MJMODEL.TXT
+
+# MuJoCo-Simulink and auto-save artifacts (if using MATLAB/Simulink)
+*.slxc
+*.autosave
+*.asv
+slprj/
