@@ -10,6 +10,18 @@
       <param name="sim_speed_factor">1.0</param>
     </hardware>
 
+    <joint name="wheel_left_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="wheel_right_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
     <joint name="joint1">
       <command_interface name="position"/>
       <state_interface name="position"/>

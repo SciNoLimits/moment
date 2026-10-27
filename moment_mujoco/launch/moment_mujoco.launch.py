@@ -23,12 +23,6 @@ def generate_launch_description():
         "moment_controllers.yaml",
     ])
 
-    plugins_file = PathJoinSubstitution([
-        description_share,
-        "config",
-        "mujoco_ros2_control_plugins.yaml",
-    ])
-
     robot_description = {
         "robot_description": ParameterValue(
             Command(["xacro ", xacro_file]),
@@ -56,7 +50,6 @@ def generate_launch_description():
         parameters=[
             {"use_sim_time": True},
             controllers_file,
-            plugins_file,
         ],
     )
 
@@ -82,9 +75,22 @@ def generate_launch_description():
         output="screen",
     )
 
+    diff_drive_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["diff_drive_controller", "--param-file", controllers_file],
+        remappings=[
+            ("/diff_drive_controller/cmd_vel_unstamped", "/cmd_vel"),
+            ("/diff_drive_controller/cmd_vel", "/cmd_vel"),
+            ("/diff_drive_controller/odom", "/odom"),
+        ],
+        output="screen",
+    )
+
     return LaunchDescription([
         robot_state_publisher,
         control_node,
         joint_state_spawner,
         arm_controller_spawner,
+        diff_drive_spawner,
     ])

@@ -104,9 +104,9 @@
     </body>
   </worldbody>
   <actuator>
-    <!--  Wheel motor controls: ctrl is desired wheel torque in N m.  -->
-    <motor name="left_wheel_motor" joint="wheel_left_joint" gear="1" ctrllimited="true" ctrlrange="-2 2" forcelimited="true" forcerange="-2 2"/>
-    <motor name="right_wheel_motor" joint="wheel_right_joint" gear="1" ctrllimited="true" ctrlrange="-2 2" forcelimited="true" forcerange="-2 2"/>
+    <!--  Wheel velocity controls: ctrl is desired wheel velocity in rad/s.  -->
+    <velocity name="wheel_left_joint" joint="wheel_left_joint" kv="0.5" ctrllimited="true" ctrlrange="-15 15" forcelimited="true" forcerange="-2 2"/>
+    <velocity name="wheel_right_joint" joint="wheel_right_joint" kv="0.5" ctrllimited="true" ctrlrange="-15 15" forcelimited="true" forcerange="-2 2"/>
     <!--  Arm position controls: ctrl is target joint angle in radians.  -->
     <position name="joint1_position" joint="joint1" kp="20" ctrlrange="-2.82743 2.82743" forcelimited="true" forcerange="-1 1"/>
     <position name="joint2_position" joint="joint2" kp="20" ctrlrange="-1.79071 1.5708" forcelimited="true" forcerange="-1 1"/>
