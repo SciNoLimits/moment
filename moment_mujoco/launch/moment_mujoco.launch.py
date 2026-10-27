@@ -9,12 +9,12 @@ from launch.substitutions import PathJoinSubstitution
 
 
 def generate_launch_description():
-    description_share = FindPackageShare("moment_description")
+    description_share = FindPackageShare("moment_mujoco")
 
     xacro_file = PathJoinSubstitution([
         description_share,
         "urdf",
-        "moment.urdf.xacro",
+        "moment_mujoco.urdf.xacro",
     ])
 
     controllers_file = PathJoinSubstitution([
