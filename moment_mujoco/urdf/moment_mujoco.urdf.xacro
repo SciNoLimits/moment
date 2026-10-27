@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<robot name="moment" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Shared MOMENT robot model -->
+  <xacro:include filename="$(find moment_description)/urdf/moment.urdf.xacro"/>
+
+  <!-- MuJoCo-specific ros2_control configuration -->
+  <xacro:include filename="$(find moment_mujoco)/urdf/moment_mujoco_control.xacro"/>
+
+</robot>
