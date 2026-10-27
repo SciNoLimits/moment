@@ -8,12 +8,13 @@ package_name = 'moment_mujoco'
 def generate_model_files() -> List[Tuple[str, Sequence[str]]]:
     data_files: List[Tuple[str, Sequence[str]]] = []
     # Recursively crawl the models folder to capture all nested structures
-    for root, dirs, files in os.walk('models'):
-        if files:
-            # Recreate the exact subfolder paths in the install space
-            install_dir = os.path.join('share', package_name, root)
-            file_paths = [os.path.join(root, f) for f in files]
-            data_files.append((install_dir, file_paths))
+    for directory in ("models", "urdf", "launch", "config"):
+        for root, dirs, files in os.walk(directory):
+            if files:
+                # Recreate the exact subfolder paths in the install space
+                install_dir = os.path.join('share', package_name, root)
+                file_paths = [os.path.join(root, f) for f in files]
+                data_files.append((install_dir, file_paths))
     return data_files
 
 setup(
