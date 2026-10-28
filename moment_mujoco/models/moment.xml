@@ -24,17 +24,19 @@
   </asset>
   <worldbody>
     <body name="base_footprint">
+      <geom name="caster_bl" type="sphere" size="0.006" pos="-0.177  0.064 0.006" condim="1" priority="1"/>
+      <geom name="caster_br" type="sphere" size="0.006" pos="-0.177 -0.064 0.006" condim="1" priority="1"/>
       <freejoint name="floating_base_joint"/>
       <body name="wheel_left_link" pos="0 0.144 0.033" quat="0.707388 -0.706825 0 0">
         <inertial pos="0 0 0" quat="-0.000890159 0.706886 0.000889646 0.707326" mass="0.0284989" diaginertia="2.07126e-05 1.11924e-05 1.11756e-05"/>
-        <joint name="wheel_left_joint" pos="0 0 0" axis="0 0 1"/>
+        <joint name="wheel_left_joint" pos="0 0 0" axis="0 0 1" damping="0.001" armature="0.001"/>
         <geom quat="0.707388 0.706825 0 0" type="mesh" mesh="left_tire" class="collision"/>
         <geom quat="0.707388 0.706825 0 0" type="mesh" rgba="0.3 0.3 0.3 1" mesh="left_tire" class="visual"/>
         <site name="wheel_left_link" pos="0 0 0" quat="1.0 0 0 0"/>
       </body>
       <body name="wheel_right_link" pos="0 -0.144 0.033" quat="0.707388 -0.706825 0 0">
         <inertial pos="0 0 0" quat="-0.000890159 0.706886 0.000889646 0.707326" mass="0.0284989" diaginertia="2.07126e-05 1.11924e-05 1.11756e-05"/>
-        <joint name="wheel_right_joint" pos="0 0 0" axis="0 0 1"/>
+        <joint name="wheel_right_joint" pos="0 0 0" axis="0 0 1" damping="0.001" armature="0.001"/>
         <geom quat="0.707388 0.706825 0 0" type="mesh" mesh="right_tire" class="collision"/>
         <geom quat="0.707388 0.706825 0 0" type="mesh" rgba="0.3 0.3 0.3 1" mesh="right_tire" class="visual"/>
         <site name="wheel_right_link" pos="0 0 0" quat="1.0 0 0 0"/>
@@ -105,8 +107,8 @@
   </worldbody>
   <actuator>
     <!--  Wheel velocity controls: ctrl is desired wheel velocity in rad/s.  -->
-    <velocity name="wheel_left_joint" joint="wheel_left_joint" kv="5" ctrllimited="true" ctrlrange="-15 15" forcelimited="true" forcerange="-2 2"/>
-    <velocity name="wheel_right_joint" joint="wheel_right_joint" kv="5" ctrllimited="true" ctrlrange="-15 15" forcelimited="true" forcerange="-2 2"/>
+    <velocity name="wheel_left_joint" joint="wheel_left_joint" kv="0.5" ctrllimited="true" ctrlrange="-15 15" forcelimited="true" forcerange="-0.5 0.5"/>
+    <velocity name="wheel_right_joint" joint="wheel_right_joint" kv="0.5" ctrllimited="true" ctrlrange="-15 15" forcelimited="true" forcerange="-0.5 0.5"/>
     <!--  Arm position controls: ctrl is target joint angle in radians.  -->
     <position name="joint1_position" joint="joint1" kp="20" ctrlrange="-2.82743 2.82743" forcelimited="true" forcerange="-1 1"/>
     <position name="joint2_position" joint="joint2" kp="20" ctrlrange="-1.79071 1.5708" forcelimited="true" forcerange="-1 1"/>
@@ -128,4 +130,8 @@
     <framepos name="base_position" objtype="site" objname="base_link"/>
     <framepos name="gripper_position_sensor" objtype="site" objname="end_effector_link"/>
   </sensor>
+  <keyframe>
+    <!-- Seting initial position [x y z qw qx qy qz ...] for freejoint + arm joints -->
+    <key name="home" qpos="0 0 0.05 1 0 0 0 0 0 0 0 0 0 0 0"/>
+  </keyframe>
 </mujoco>
