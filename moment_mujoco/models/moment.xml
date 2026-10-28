@@ -24,6 +24,10 @@
   </asset>
   <worldbody>
     <body name="base_footprint">
+      <inertial pos="0 0 0.01" mass="1.3729096"
+          fullinertia="8.7002718e-03 8.6195418e-03 1.4612727e-02 -4.7576583e-05 1.1160499e-04 -3.5422299e-06"/>
+      <geom name="bumper_fl" type="sphere" size="0.006" pos="0.06  0.064 0.0065" condim="1" priority="1"/>
+      <geom name="bumper_fr" type="sphere" size="0.006" pos="0.06 -0.064 0.0065" condim="1" priority="1"/>
       <geom name="caster_bl" type="sphere" size="0.006" pos="-0.177  0.064 0.006" condim="1" priority="1"/>
       <geom name="caster_br" type="sphere" size="0.006" pos="-0.177 -0.064 0.006" condim="1" priority="1"/>
       <freejoint name="floating_base_joint"/>
@@ -88,6 +92,7 @@
         <site name="link2" pos="0 0 0" quat="1.0 0 0 0"/>
       </body>
       <geom pos="-0.064 0 0.01" quat="1 0 0 0" type="mesh" mesh="base" class="collision"/>
+      <!-- <geom name="base_collision" type="box" size="0.133 0.133 0.047" pos="-0.064 0 0.057" class="collision"/> -->
       <geom pos="-0.064 0 0.01" quat="1 0 0 0" type="mesh" rgba="0.4 0.4 0.4 1" mesh="base" class="visual"/>
       <geom pos="-0.024 0 0.132" quat="1 0 0 0" type="mesh" mesh="ladar" class="collision"/>
       <geom pos="-0.024 0 0.132" quat="1 0 0 0" type="mesh" rgba="0.3 0.3 0.3 1" mesh="ladar" class="visual"/>
