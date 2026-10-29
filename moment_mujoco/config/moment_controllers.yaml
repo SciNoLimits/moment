@@ -82,5 +82,5 @@ arm_position_controller:
 
 imu_sensor_broadcaster:
   ros__parameters:
-    sensor_name: "imu_sensor"
-    frame_id: "imu_link"
+    sensor_name: imu_sensor
+    frame_id: imu_link

@@ -136,9 +136,9 @@
     <framepos name="gripper_position_sensor" objtype="site" objname="end_effector_link"/>
 
     <!-- IMU Sensors -->
-    <accelerometer name="imu_sensor/linear_acceleration" site="imu_link"/>
-    <gyro name="imu_sensor/angular_velocity" site="imu_link"/>
-    <framequat name="imu_sensor/orientation" objtype="site" objname="imu_link"/>
+    <framequat name="imu_sensor_quat" objtype="site" objname="imu_link"/>
+  <gyro name="imu_sensor_gyro" site="imu_link"/>
+  <accelerometer name="imu_sensor_accel" site="imu_link"/>
   </sensor>
   <keyframe>
     <!-- Seting initial position [x y z qw qx qy qz ...] for freejoint + arm joints -->
