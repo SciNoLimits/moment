@@ -24,8 +24,8 @@
   </asset>
   <worldbody>
     <body name="base_footprint">
-      <inertial pos="0 0 0.01" mass="1.3729096"
-          fullinertia="8.7002718e-03 8.6195418e-03 1.4612727e-02 -4.7576583e-05 1.1160499e-04 -3.5422299e-06"/>
+      <inertial pos="0 0 0.01" mass="1.3729096" fullinertia="8.7002718e-03 8.6195418e-03 1.4612727e-02 -4.7576583e-05 1.1160499e-04 -3.5422299e-06"/>
+      <camera name="camera" pos="0.076 0 0.103" xyaxes="0 -1 0 0 0 1" fovy="49" resolution="640 480" mode="fixed"/>
       <geom name="bumper_fl" type="sphere" size="0.006" pos="0.06  0.064 0.0065" condim="1" priority="1"/>
       <geom name="bumper_fr" type="sphere" size="0.006" pos="0.06 -0.064 0.0065" condim="1" priority="1"/>
       <geom name="caster_bl" type="sphere" size="0.006" pos="-0.177  0.064 0.006" condim="1" priority="1"/>
