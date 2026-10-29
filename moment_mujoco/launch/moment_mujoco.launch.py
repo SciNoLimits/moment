@@ -83,6 +83,18 @@ def generate_launch_description():
       output="screen",
     )
 
+    imu_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "imu_sensor_broadcaster",
+            "--param-file",
+            controllers_file,
+            "--controller-ros-args=-r imu_sensor_broadcaster/imu:=/imu",
+        ],
+        output="screen",
+    )
+
 
     return LaunchDescription([
         robot_state_publisher,
@@ -90,4 +102,5 @@ def generate_launch_description():
         joint_state_spawner,
         arm_controller_spawner,
         diff_drive_spawner,
+        imu_spawner,
     ])
