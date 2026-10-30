@@ -16,8 +16,8 @@
       #   topic_name: "/scan"            
       #   frame_id: "base_scan"
 
-        # mujoco_3d_lidar_plugin:
-        #   type: "mujoco_ros2_control_plugins/Mujoco3dLidarPlugin"
-        #   2d_lidar:
-        #     frame_name: "base_scan"
-        #     topic: "/lidar_scan_2d"
+      mujoco_3d_lidar_plugin:
+        type: "mujoco_ros2_control_plugins/Mujoco3dLidarPlugin"
+        lidar_2d:
+          frame_name: base_scan
+          topic: /scan
