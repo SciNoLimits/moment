@@ -9,6 +9,21 @@
       <geom contype="0" conaffinity="0" group="1" density="0"/>
     </default>
   </default>
+
+  <extension>
+    <plugin plugin="mujoco.plugin.lidar">
+      <instance name="lidar_2d">
+        <config key="resolution" value="360 1"/>
+        <config key="azimuth_range" value="-3.14159 3.14159"/>
+        <config key="elevation_range" value="0.0"/>
+        <config key="max_range" value="3.5"/>
+        <config key="min_range" value="0.12"/>
+        <config key="update_rate" value="5.0"/>
+        <config key="async" value="0"/>
+      </instance>
+    </plugin>
+  </extension>
+
   <asset>
     <mesh name="base" content_type="model/stl" file="full/base.stl" scale="0.001 0.001 0.001"/>
     <mesh name="left_tire" content_type="model/stl" file="full/left_tire.stl" scale="0.001 0.001 0.001"/>
@@ -137,8 +152,12 @@
 
     <!-- IMU Sensors -->
     <framequat name="imu_sensor_quat" objtype="site" objname="imu_link"/>
-  <gyro name="imu_sensor_gyro" site="imu_link"/>
-  <accelerometer name="imu_sensor_accel" site="imu_link"/>
+    <gyro name="imu_sensor_gyro" site="imu_link"/>
+    <accelerometer name="imu_sensor_accel" site="imu_link"/>
+
+    <!-- Lidar Sensor -->
+    <plugin name="lidar_2d" instance="lidar_2d" objtype="site" objname="base_scan"/>
+
   </sensor>
   <keyframe>
     <!-- Seting initial position [x y z qw qx qy qz ...] for freejoint + arm joints -->

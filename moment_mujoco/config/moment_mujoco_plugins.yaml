@@ -1,0 +1,23 @@
+/**:
+  ros__parameters:
+    mujoco_plugins:
+      mujoco_camera_plugin:
+        type: "mujoco_ros2_control_plugins/CameraPlugin"
+        camera_publish_rate: 10.0
+        camera:
+          policy: streaming
+          frame_name: camera_rgb_optical_frame
+          info_topic: /camera/camera_info
+          image_topic: /camera/image_raw
+          depth_topic: /camera/depth/image_raw
+      # mujoco_lidar_plugin:
+      #   type: "mujoco_ros2_control_plugins/Mujoco3dLidarPlugin"
+      #   sensor_name: "lidar_2d"      
+      #   topic_name: "/scan"            
+      #   frame_id: "base_scan"
+
+        # mujoco_3d_lidar_plugin:
+        #   type: "mujoco_ros2_control_plugins/Mujoco3dLidarPlugin"
+        #   2d_lidar:
+        #     frame_name: "base_scan"
+        #     topic: "/lidar_scan_2d"

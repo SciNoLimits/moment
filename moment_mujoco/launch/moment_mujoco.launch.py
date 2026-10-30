@@ -23,6 +23,12 @@ def generate_launch_description():
         "moment_controllers.yaml",
     ])
 
+    plugins_file = PathJoinSubstitution([
+        description_share, 
+        "config", 
+        "moment_mujoco_plugins.yaml"
+    ])
+
     robot_description = {
         "robot_description": ParameterValue(
             Command(["xacro ", xacro_file]),
@@ -50,6 +56,7 @@ def generate_launch_description():
         parameters=[
             {"use_sim_time": True},
             controllers_file,
+            plugins_file,
         ],
     )
 
