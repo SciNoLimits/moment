@@ -5,7 +5,7 @@
     <hardware>
       <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
 
-      <param name="mujoco_model">$(find moment_mujoco)/models/moment_scene.xml</param>
+      <param name="mujoco_model">$(find moment_mujoco)/models/moment_warehouse_scene.xml</param>
       <param name="headless">false</param>
       <param name="sim_speed_factor">1.0</param>
     </hardware>
