@@ -10,11 +10,6 @@
           info_topic: /camera/camera_info
           image_topic: /camera/image_raw
           depth_topic: /camera/depth/image_raw
-      # mujoco_lidar_plugin:
-      #   type: "mujoco_ros2_control_plugins/Mujoco3dLidarPlugin"
-      #   sensor_name: "lidar_2d"      
-      #   topic_name: "/scan"            
-      #   frame_id: "base_scan"
 
       mujoco_3d_lidar_plugin:
         type: "mujoco_ros2_control_plugins/Mujoco3dLidarPlugin"
