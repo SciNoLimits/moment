@@ -109,7 +109,7 @@
       <geom pos="-0.064 0 0.01" quat="1 0 0 0" type="mesh" mesh="base" class="collision"/>
       <!-- <geom name="base_collision" type="box" size="0.133 0.133 0.047" pos="-0.064 0 0.057" class="collision"/> -->
       <geom pos="-0.064 0 0.01" quat="1 0 0 0" type="mesh" rgba="0.4 0.4 0.4 1" mesh="base" class="visual"/>
-      <geom pos="-0.024 0 0.132" quat="1 0 0 0" type="mesh" mesh="ladar" class="collision"/>
+      <!-- <geom pos="-0.024 0 0.132" quat="1 0 0 0" type="mesh" mesh="ladar" class="collision"/> -->
       <geom pos="-0.024 0 0.132" quat="1 0 0 0" type="mesh" rgba="0.3 0.3 0.3 1" mesh="ladar" class="visual"/>
       <geom pos="-0.092 0 0.101" quat="1 0 0 0" type="mesh" mesh="link1" class="collision"/>
       <geom pos="-0.092 0 0.101" quat="1 0 0 0" type="mesh" mesh="link1" class="visual"/>
