@@ -10,7 +10,7 @@
     </default>
   </default>
 
-  <extension>
+  <!-- <extension>
     <plugin plugin="mujoco.plugin.lidar">
       <instance name="lidar_2d">
         <config key="resolution" value="360 1"/>
@@ -22,7 +22,7 @@
         <config key="async" value="0"/>
       </instance>
     </plugin>
-  </extension>
+  </extension> -->
 
   <asset>
     <mesh name="base" content_type="model/stl" file="full/base.stl" scale="0.001 0.001 0.001"/>
@@ -156,7 +156,7 @@
     <accelerometer name="imu_sensor_accel" site="imu_link"/>
 
     <!-- Lidar Sensor -->
-    <plugin name="lidar_2d" instance="lidar_2d" objtype="site" objname="base_scan"/>
+    <!-- <plugin name="lidar_2d" instance="lidar_2d" objtype="site" objname="base_scan"/> -->
 
   </sensor>
   <keyframe>

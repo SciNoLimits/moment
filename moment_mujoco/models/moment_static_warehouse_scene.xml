@@ -1,20 +1,24 @@
 <mujoco model="warehouse_maze">
-  <option timestep="0.002" gravity="0 0 -9.81"/>
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="implicitfast"/>
 
   <statistic center="0 0 0" extent="9"/>
   <visual>
-    <global azimuth="90" elevation="-65"/>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="120" elevation="-35"/>
   </visual>
 
   <asset>
-    <texture name="floor_grid" type="2d" builtin="checker"
-             rgb1="0.24 0.28 0.32" rgb2="0.29 0.33 0.37" width="128" height="128"/>
-    <material name="floor" texture="floor_grid" texrepeat="14 10"/>
+    <texture type="skybox" builtin="gradient" rgb1="0.4 0.6 0.8" rgb2="0.7 0.8 0.9" width="512" height="3072"/>
+    <texture type="2d" name="concrete" builtin="checker" mark="edge" rgb1="0.56 0.56 0.58" rgb2="0.52 0.52 0.54"
+             markrgb="0.45 0.45 0.47" width="300" height="300"/>
+    <material name="floor_mat" texture="concrete" texuniform="true" texrepeat="2 2" reflectance="0.05"/>
+    <model name="moment" file="moment.xml"/>
   </asset>
 
   <default>
     <default class="wall">
-      <geom type="box" rgba="0.56 0.64 0.71 1"/>
+      <geom type="box" rgba="0.56 0.64 0.71 1" contype="0" conaffinity="0" group="1"/>
     </default>
     <default class="zone">
       <!-- A floor overlay with contact disabled. -->
@@ -23,9 +27,10 @@
   </default>
 
   <worldbody>
-    <light pos="0 0 8" dir="0 0 -1" directional="true"/>
-    <camera name="overhead" pos="0 0 18" quat="1 0 0 0" fovy="46"/>
-    <geom name="floor" type="plane" size="7 5 0.1" material="floor"/>
+    <light name="main_light" directional="true" diffuse="0.7 0.7 0.7" specular="0.15 0.15 0.15" pos="3 0 6" dir="-0.2 0.1 -1"/>
+    <light name="fill_light" pos="3 0 3" dir="0 0 -1" diffuse="0.35 0.35 0.35" castshadow="false"/>
+
+    <geom name="floor" type="plane" size="0 0 0.25" material="floor_mat" condim="3"/>
 
     <!-- Dimensions in metres. Box size uses half-extents. -->
     <body name="perimeter" childclass="wall">
@@ -79,5 +84,6 @@
       <geom name="staging_pad" pos="0 0 0.002" size="1.15 0.65 0.002" rgba="0.92 0.80 0.27 1"/>
       <site name="start" pos="0 0 0.01" size="0.055" rgba="1 1 1 1"/>
     </body>
+    <attach model="moment" body="base_footprint" prefix=""/>
   </worldbody>
 </mujoco>
