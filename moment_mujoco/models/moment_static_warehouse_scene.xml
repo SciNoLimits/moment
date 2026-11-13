@@ -1,0 +1,83 @@
+<mujoco model="warehouse_maze">
+  <option timestep="0.002" gravity="0 0 -9.81"/>
+
+  <statistic center="0 0 0" extent="9"/>
+  <visual>
+    <global azimuth="90" elevation="-65"/>
+  </visual>
+
+  <asset>
+    <texture name="floor_grid" type="2d" builtin="checker"
+             rgb1="0.24 0.28 0.32" rgb2="0.29 0.33 0.37" width="128" height="128"/>
+    <material name="floor" texture="floor_grid" texrepeat="14 10"/>
+  </asset>
+
+  <default>
+    <default class="wall">
+      <geom type="box" rgba="0.56 0.64 0.71 1"/>
+    </default>
+    <default class="zone">
+      <!-- A floor overlay with contact disabled. -->
+      <geom type="box" contype="0" conaffinity="0"/>
+    </default>
+  </default>
+
+  <worldbody>
+    <light pos="0 0 8" dir="0 0 -1" directional="true"/>
+    <camera name="overhead" pos="0 0 18" quat="1 0 0 0" fovy="46"/>
+    <geom name="floor" type="plane" size="7 5 0.1" material="floor"/>
+
+    <!-- Dimensions in metres. Box size uses half-extents. -->
+    <body name="perimeter" childclass="wall">
+      <geom name="north" pos="0 5 0.6" size="7.1 0.1 0.6"/>
+      <geom name="south" pos="0 -5 0.6" size="7.1 0.1 0.6"/>
+      <geom name="west" pos="-7 0 0.6" size="0.1 4.9 0.6"/>
+      <geom name="east" pos="7 0 0.6" size="0.1 4.9 0.6"/>
+    </body>
+
+    <!-- Three north bays, with 1.4 m openings centred on x = -4.5, 0, 4.5. -->
+    <body name="bay_walls" childclass="wall">
+      <geom name="red_green_partition" pos="-2.25 3.7 0.6" size="0.1 1.2 0.6"/>
+      <geom name="green_blue_partition" pos="2.25 3.7 0.6" size="0.1 1.2 0.6"/>
+      <geom name="bay_front_west" pos="-6.05 2.4 0.6" size="0.85 0.1 0.6"/>
+      <geom name="bay_front_red_green" pos="-2.25 2.4 0.6" size="1.55 0.1 0.6"/>
+      <geom name="bay_front_green_blue" pos="2.25 2.4 0.6" size="1.55 0.1 0.6"/>
+      <geom name="bay_front_east" pos="6.05 2.4 0.6" size="0.85 0.1 0.6"/>
+    </body>
+
+    <!-- Staggered barriers leave openings around their ends. -->
+    <body name="aisle_walls" childclass="wall">
+      <geom name="west_barrier" pos="-5.55 0.5 0.6" size="1.35 0.1 0.6"/>
+      <geom name="south_barrier" pos="-2.7 -2.95 0.6" size="0.1 1.95 0.6"/>
+      <geom name="centre_barrier" pos="-0.15 0.7 0.6" size="1.15 0.1 0.6"/>
+      <geom name="east_inner_barrier" pos="2.5 -0.3 0.6" size="0.1 1.5 0.6"/>
+      <geom name="east_outer_barrier" pos="5.7 -1.8 0.6" size="1.2 0.1 0.6"/>
+    </body>
+
+    <!-- A site at each pad's centre provides a named waypoint for Python. -->
+    <body name="red_bay" pos="-4.5 3.8 0" childclass="zone">
+      <geom name="red_pad" pos="0 0 0.002" size="0.75 0.6 0.002" rgba="0.83 0.18 0.32 1"/>
+      <site name="R" pos="0 0 0.01" size="0.055" rgba="1 1 1 1"/>
+    </body>
+    <body name="green_bay" pos="0 3.8 0" childclass="zone">
+      <geom name="green_pad" pos="0 0 0.002" size="0.75 0.6 0.002" rgba="0.38 0.75 0.18 1"/>
+      <site name="G" pos="0 0 0.01" size="0.055" rgba="1 1 1 1"/>
+    </body>
+    <body name="blue_bay" pos="4.5 3.8 0" childclass="zone">
+      <geom name="blue_pad" pos="0 0 0.002" size="0.75 0.6 0.002" rgba="0.16 0.55 0.93 1"/>
+      <site name="B" pos="0 0 0.01" size="0.055" rgba="1 1 1 1"/>
+    </body>
+    <body name="west_t_zone" pos="-5.9 1.4 0" childclass="zone">
+      <geom name="t_pad" pos="0 0 0.002" size="0.55 0.4 0.002" rgba="0.69 0.46 0.87 1"/>
+      <site name="T" pos="0 0 0.01" size="0.055" rgba="1 1 1 1"/>
+    </body>
+    <body name="west_d_zone" pos="-5.9 -3.8 0" childclass="zone">
+      <geom name="d_pad" pos="0 0 0.002" size="0.55 0.4 0.002" rgba="0.96 0.61 0.22 1"/>
+      <site name="D" pos="0 0 0.01" size="0.055" rgba="1 1 1 1"/>
+    </body>
+    <body name="staging_area" pos="0 -3.7 0" childclass="zone">
+      <geom name="staging_pad" pos="0 0 0.002" size="1.15 0.65 0.002" rgba="0.92 0.80 0.27 1"/>
+      <site name="start" pos="0 0 0.01" size="0.055" rgba="1 1 1 1"/>
+    </body>
+  </worldbody>
+</mujoco>
