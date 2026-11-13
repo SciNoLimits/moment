@@ -9,6 +9,21 @@
       <geom contype="0" conaffinity="0" group="1" density="0"/>
     </default>
   </default>
+
+  <extension>
+    <plugin plugin="mujoco.plugin.lidar">
+      <instance name="lidar_2d">
+        <config key="resolution" value="360 1"/>
+        <config key="azimuth_range" value="-3.14159 3.14159"/>
+        <config key="elevation_range" value="0.0"/>
+        <config key="max_range" value="3.5"/>
+        <config key="min_range" value="0.12"/>
+        <config key="update_rate" value="5.0"/>
+        <config key="async" value="0"/>
+      </instance>
+    </plugin>
+  </extension>
+
   <asset>
     <mesh name="base" content_type="model/stl" file="full/base.stl" scale="0.001 0.001 0.001"/>
     <mesh name="left_tire" content_type="model/stl" file="full/left_tire.stl" scale="0.001 0.001 0.001"/>
@@ -24,17 +39,23 @@
   </asset>
   <worldbody>
     <body name="base_footprint">
+      <inertial pos="0 0 0.01" mass="1.3729096" fullinertia="8.7002718e-03 8.6195418e-03 1.4612727e-02 -4.7576583e-05 1.1160499e-04 -3.5422299e-06"/>
+      <camera name="camera" pos="0.076 0 0.103" xyaxes="0 -1 0 0 0 1" fovy="49" resolution="640 480" mode="fixed"/>
+      <geom name="bumper_fl" type="sphere" size="0.006" pos="0.06  0.064 0.0065" condim="1" priority="1"/>
+      <geom name="bumper_fr" type="sphere" size="0.006" pos="0.06 -0.064 0.0065" condim="1" priority="1"/>
+      <geom name="caster_bl" type="sphere" size="0.006" pos="-0.177  0.064 0.006" condim="1" priority="1"/>
+      <geom name="caster_br" type="sphere" size="0.006" pos="-0.177 -0.064 0.006" condim="1" priority="1"/>
       <freejoint name="floating_base_joint"/>
       <body name="wheel_left_link" pos="0 0.144 0.033" quat="0.707388 -0.706825 0 0">
         <inertial pos="0 0 0" quat="-0.000890159 0.706886 0.000889646 0.707326" mass="0.0284989" diaginertia="2.07126e-05 1.11924e-05 1.11756e-05"/>
-        <joint name="wheel_left_joint" pos="0 0 0" axis="0 0 1"/>
+        <joint name="wheel_left_joint" pos="0 0 0" axis="0 0 1" damping="0.001" armature="0.001"/>
         <geom quat="0.707388 0.706825 0 0" type="mesh" mesh="left_tire" class="collision"/>
         <geom quat="0.707388 0.706825 0 0" type="mesh" rgba="0.3 0.3 0.3 1" mesh="left_tire" class="visual"/>
         <site name="wheel_left_link" pos="0 0 0" quat="1.0 0 0 0"/>
       </body>
       <body name="wheel_right_link" pos="0 -0.144 0.033" quat="0.707388 -0.706825 0 0">
         <inertial pos="0 0 0" quat="-0.000890159 0.706886 0.000889646 0.707326" mass="0.0284989" diaginertia="2.07126e-05 1.11924e-05 1.11756e-05"/>
-        <joint name="wheel_right_joint" pos="0 0 0" axis="0 0 1"/>
+        <joint name="wheel_right_joint" pos="0 0 0" axis="0 0 1" damping="0.001" armature="0.001"/>
         <geom quat="0.707388 0.706825 0 0" type="mesh" mesh="right_tire" class="collision"/>
         <geom quat="0.707388 0.706825 0 0" type="mesh" rgba="0.3 0.3 0.3 1" mesh="right_tire" class="visual"/>
         <site name="wheel_right_link" pos="0 0 0" quat="1.0 0 0 0"/>
@@ -86,6 +107,7 @@
         <site name="link2" pos="0 0 0" quat="1.0 0 0 0"/>
       </body>
       <geom pos="-0.064 0 0.01" quat="1 0 0 0" type="mesh" mesh="base" class="collision"/>
+      <!-- <geom name="base_collision" type="box" size="0.133 0.133 0.047" pos="-0.064 0 0.057" class="collision"/> -->
       <geom pos="-0.064 0 0.01" quat="1 0 0 0" type="mesh" rgba="0.4 0.4 0.4 1" mesh="base" class="visual"/>
       <geom pos="-0.024 0 0.132" quat="1 0 0 0" type="mesh" mesh="ladar" class="collision"/>
       <geom pos="-0.024 0 0.132" quat="1 0 0 0" type="mesh" rgba="0.3 0.3 0.3 1" mesh="ladar" class="visual"/>
@@ -103,4 +125,42 @@
       <site name="link1" pos="-0.092 0 0.10099999999999999" quat="1.0 0 0 0"/>
     </body>
   </worldbody>
+  <actuator>
+    <!--  Wheel velocity controls: ctrl is desired wheel velocity in rad/s.  -->
+    <velocity name="wheel_left_joint" joint="wheel_left_joint" kv="0.5" ctrllimited="true" ctrlrange="-15 15" forcelimited="true" forcerange="-0.5 0.5"/>
+    <velocity name="wheel_right_joint" joint="wheel_right_joint" kv="0.5" ctrllimited="true" ctrlrange="-15 15" forcelimited="true" forcerange="-0.5 0.5"/>
+    <!--  Arm position controls: ctrl is target joint angle in radians.  -->
+    <position name="joint1_position" joint="joint1" kp="20" ctrlrange="-2.82743 2.82743" forcelimited="true" forcerange="-1 1"/>
+    <position name="joint2_position" joint="joint2" kp="20" ctrlrange="-1.79071 1.5708" forcelimited="true" forcerange="-1 1"/>
+    <position name="joint3_position" joint="joint3" kp="15" ctrlrange="-0.942478 1.3823" forcelimited="true" forcerange="-1 1"/>
+    <position name="joint4_position" joint="joint4" kp="10" ctrlrange="-1.79071 2.04204" forcelimited="true" forcerange="-1 1"/>
+    <!--  The equality constraint couples the two gripper slides.  -->
+    <position name="gripper_position" joint="gripper_left_joint" kp="100" ctrlrange="-0.01 0.019" forcerange="-1 1"/>
+  </actuator>
+  <equality>
+    <joint name="gripper_coupling" joint1="gripper_right_joint" joint2="gripper_left_joint" polycoef="0 1 0 0 0"/>
+  </equality>
+  <sensor>
+    <jointpos name="joint1_angle" joint="joint1"/>
+    <jointpos name="joint2_angle" joint="joint2"/>
+    <jointpos name="joint3_angle" joint="joint3"/>
+    <jointpos name="joint4_angle" joint="joint4"/>
+    <jointpos name="gripper_opening" joint="gripper_left_joint"/>
+
+    <framepos name="base_position" objtype="site" objname="base_link"/>
+    <framepos name="gripper_position_sensor" objtype="site" objname="end_effector_link"/>
+
+    <!-- IMU Sensors -->
+    <framequat name="imu_sensor_quat" objtype="site" objname="imu_link"/>
+    <gyro name="imu_sensor_gyro" site="imu_link"/>
+    <accelerometer name="imu_sensor_accel" site="imu_link"/>
+
+    <!-- Lidar Sensor -->
+    <plugin name="lidar_2d" instance="lidar_2d" objtype="site" objname="base_scan"/>
+
+  </sensor>
+  <keyframe>
+    <!-- Seting initial position [x y z qw qx qy qz ...] for freejoint + arm joints -->
+    <key name="home" qpos="0 0 0.05 1 0 0 0 0 0 0 0 0 0 0 0"/>
+  </keyframe>
 </mujoco>
