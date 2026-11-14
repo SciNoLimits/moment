@@ -107,8 +107,12 @@
       <site name="camera_link" pos="0.073 -0.011 0.094" quat="1.0 0 0 0"/>
       <site name="camera_rgb_frame" pos="0.076 0 0.103" quat="1.0 0 0 0"/>
       <site name="camera_rgb_optical_frame" pos="0.076 0 0.103" quat="0.5003981633553666 -0.49999984146591736 0.4996018366446334 -0.49999984146591736"/>
+      <camera name="camera" mode="fixed" fovy="58" resolution="640 480" pos="0.076 0 0.103" quat="0.5 0.5 -0.5 -0.5"/>
       <site name="link1" pos="-0.092 0 0.10099999999999999" quat="1.0 0 0 0"/>
     </body>
+    <body name="red_cube" pos="0.5 0.10 0.02"><freejoint/><geom type="box" size="0.02 0.02 0.02" rgba="1 0 0 1" mass="0.05"/></body>
+    <body name="green_cube" pos="0.5 0 0.02"><freejoint/><geom type="box" size="0.02 0.02 0.02" rgba="0 1 0 1" mass="0.05"/></body>
+    <body name="blue_cube" pos="0.5 -0.10 0.02"><freejoint/><geom type="box" size="0.02 0.02 0.02" rgba="0 0 1 1" mass="0.05"/></body>
   </worldbody>
   <actuator>
     <!--  Wheel motor controls: ctrl is desired wheel torque in N m.  -->

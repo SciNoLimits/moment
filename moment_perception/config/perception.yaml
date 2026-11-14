@@ -1,0 +1,38 @@
+# color_detector parameters
+# HSV in OpenCV units: H 0-180, S 0-255, V 0-255. Each list = N ranges of [h,s,v low, h,s,v high].
+color_detector:
+  ros__parameters:
+    # Topics: defaults match a Gazebo Harmonic rgbd_camera with <topic>camera</topic>
+    # bridged by sim/camera_bridge.yaml. For a real RealSense use:
+    #   /camera/camera/color/image_raw, /camera/camera/aligned_depth_to_color/image_raw,
+    #   /camera/camera/color/camera_info  and depth_scale 0.001
+    rgb_topic: /camera/image
+    depth_topic: /camera/depth_image
+    info_topic: /camera/camera_info
+    depth_scale: 1.0
+
+    # Frame the positions are returned in. Ask the manipulation side which one they want
+    # (base_footprint, the arm base link1, or map).
+    target_frame: base_footprint
+
+    colors: [red, green, blue]
+    hsv:
+      red:   [0, 120, 70, 10, 255, 255, 170, 120, 70, 180, 255, 255]   # red wraps around H=0
+      green: [40, 80, 60, 85, 255, 255]
+      blue:  [100, 120, 60, 130, 255, 255]
+
+    min_area_px: 150          # smaller blobs are noise
+    min_depth: 0.1            # metres; ignore readings closer/further than this
+    max_depth: 4.0
+    erode_px: 3               # drop blob edges, where depth mixes object and background
+    # What point is returned. 'center' = cube centre for grasping (manipulation needs this).
+    #   x, y: visible surface pushed half a cube horizontally away from the camera
+    #   z:    ground_z + cube_size/2 when cube_on_ground is true (exact, not measured)
+    # target_frame must have z pointing up (base_footprint, link1 and map all do).
+    output_point: center
+    cube_size: 0.04
+    cube_on_ground: true
+    ground_z: 0.0
+    max_frame_age: 1.0
+    continuous: false         # true = publish poses on every frame (useful for tuning in RViz)
+    publish_debug_image: true
