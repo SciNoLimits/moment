@@ -1,0 +1,27 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: moment_mujoco
+    relative_path: urdf/moment_mujoco.urdf.xacro
+  srdf:
+    relative_path: config/moment.srdf
+  package_settings:
+    author_name: Sai Harshit Balaji
+    author_email: sai.harshitbalaji@gmail.com
+    generated_timestamp: 1794684918
+  control_xacro:
+    command:
+      - position
+      - velocity
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+      - velocity
+    state:
+      - position
+      - velocity
