@@ -1,0 +1,135 @@
+<!-- MOMENT warehouse maze with a three-cube pickup tray. -->
+<mujoco model="moment_combined_warehouse_scene">
+  <statistic center="0 0.48 0.3" extent="9"/>
+
+  <option integrator="implicitfast"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azimuth="120" elevation="-35"/>
+  </visual>
+
+  <default>
+    <default class="warehouse_wall">
+      <geom type="box" rgba="0.62 0.62 0.64 1" group="1"/>
+    </default>
+    <default class="pickup_tray">
+      <geom type="box" material="pickup_tray_mat" friction="1.0 0.005 0.0001"/>
+    </default>
+    <default class="decal">
+      <geom contype="0" conaffinity="0" group="1"/>
+    </default>
+    <default class="item">
+      <geom friction="1.0 0.005 0.0001"/>
+    </default>
+  </default>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.4 0.6 0.8" rgb2="0.7 0.8 0.9" width="512" height="3072"/>
+    <texture type="2d" name="concrete" builtin="checker" mark="edge" rgb1="0.56 0.56 0.58" rgb2="0.52 0.52 0.54"
+             markrgb="0.45 0.45 0.47" width="300" height="300"/>
+    <material name="floor_mat" texture="concrete" texuniform="true" texrepeat="2 2" reflectance="0.05"/>
+    <material name="pickup_tray_mat" rgba="0.20 0.23 0.27 1" specular="0.35" shininess="0.28"/>
+    <model name="moment" file="moment.xml"/>
+  </asset>
+
+  <worldbody>
+    <light name="main_light" directional="true" diffuse="0.7 0.7 0.7" specular="0.15 0.15 0.15" pos="3 0 6" dir="-0.2 0.1 -1"/>
+    <light name="fill_light" pos="3 0 3" dir="0 0 -1" diffuse="0.35 0.35 0.35" castshadow="false"/>
+
+    <geom name="floor" type="plane" size="0 0 0.25" material="floor_mat" condim="3"/>
+
+    <!-- Dimensions in metres. Box size uses half-extents. -->
+    <body name="perimeter" childclass="warehouse_wall">
+      <geom name="north" pos="0 5.96 0.6" size="7.1 0.1 0.6"/>
+      <geom name="south" pos="0 -5 0.6" size="7.1 0.1 0.6"/>
+      <geom name="west" pos="-7 0.48 0.6" size="0.1 5.38 0.6"/>
+      <geom name="east" pos="7 0.48 0.6" size="0.1 5.38 0.6"/>
+    </body>
+
+    <!-- North rooms extend 0.96 m further north for 40% more floor area.
+         Red and green open onto the aisle. Blue opens only into green. -->
+    <body name="bay_walls" childclass="warehouse_wall">
+      <geom name="red_green_partition" pos="-2.25 4.18 0.6" size="0.1 1.68 0.6"/>
+      <geom name="green_blue_partition_south" pos="2.25 2.84 0.6" size="0.1 0.34 0.6"/>
+      <geom name="green_blue_partition_north" pos="2.25 5.22 0.6" size="0.1 0.64 0.6"/>
+      <geom name="bay_front_west" pos="-6.05 2.4 0.6" size="0.85 0.1 0.6"/>
+      <geom name="bay_front_red_green" pos="-2.25 2.4 0.6" size="1.55 0.1 0.6"/>
+      <geom name="bay_front_east" pos="3.8 2.4 0.6" size="3.1 0.1 0.6"/>
+    </body>
+
+    <!-- Staggered barriers leave openings around their ends. -->
+    <body name="aisle_walls" childclass="warehouse_wall">
+      <geom name="west_barrier" pos="-5.55 0.5 0.6" size="1.35 0.1 0.6"/>
+      <geom name="south_barrier" pos="-2.7 -2.95 0.6" size="0.1 1.95 0.6"/>
+      <geom name="centre_barrier" pos="-0.15 0.7 0.6" size="1.15 0.1 0.6"/>
+      <geom name="east_inner_barrier" pos="2.5 -0.3 0.6" size="0.1 1.5 0.6"/>
+      <geom name="east_outer_barrier" pos="5.7 -1.8 0.6" size="1.2 0.1 0.6"/>
+    </body>
+
+    <!-- Open-top sorting bins, 28 cm square and 11 cm tall. -->
+    <body name="red_bay" pos="-4.5 4.70 0">
+      <geom name="bin_red_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.85 0.15 0.15 1"/>
+      <geom name="bin_red_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.85 0.15 0.15 1"/>
+      <geom name="bin_red_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.85 0.15 0.15 1"/>
+      <geom name="bin_red_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.85 0.15 0.15 1"/>
+      <geom name="bin_red_wall_w" type="box" pos="-0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.85 0.15 0.15 1"/>
+      <site name="R" pos="0 0 0.015" size="0.055" rgba="1 1 1 0"/>
+    </body>
+    <body name="green_bay" pos="0 4.70 0">
+      <geom name="bin_green_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.15 0.7 0.25 1"/>
+      <geom name="bin_green_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.7 0.25 1"/>
+      <geom name="bin_green_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.7 0.25 1"/>
+      <geom name="bin_green_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.15 0.7 0.25 1"/>
+      <geom name="bin_green_wall_w" type="box" pos="-0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.15 0.7 0.25 1"/>
+      <site name="G" pos="0 0 0.015" size="0.055" rgba="1 1 1 0"/>
+    </body>
+    <body name="blue_bay" pos="4.5 4.70 0">
+      <geom name="bin_blue_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.15 0.3 0.85 1"/>
+      <geom name="bin_blue_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.3 0.85 1"/>
+      <geom name="bin_blue_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.3 0.85 1"/>
+      <geom name="bin_blue_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.15 0.3 0.85 1"/>
+      <geom name="bin_blue_wall_w" type="box" pos="-0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.15 0.3 0.85 1"/>
+      <site name="B" pos="0 0 0.015" size="0.055" rgba="1 1 1 0"/>
+    </body>
+
+    <!-- Waypoints retained for navigation without visible floor markings. -->
+    <site name="T" pos="-5.9 1.4 0.01" size="0.055" rgba="1 1 1 0"/>
+    <site name="D" pos="-5.9 -3.8 0.01" size="0.055" rgba="1 1 1 0"/>
+    <body name="staging_area" pos="0 -3.7 0">
+      <geom name="staging_pad" class="decal" type="box" pos="0 0 0.002" size="0.18 0.16 0.002" rgba="0.92 0.80 0.27 1"/>
+      <site name="start" pos="0 0 0.01" size="0.055" rgba="1 1 1 1"/>
+    </body>
+
+    <!-- Pickup tray centred 0.50 m along +X from the robot spawn.
+         The tray is fixed. Its inner surface is at z = 0.032 m. -->
+    <body name="pickup_tray" pos="0.50 -3.7 0" childclass="pickup_tray">
+      <geom name="pickup_tray_foot_left" pos="0 0.10 0.006" size="0.075 0.015 0.006"/>
+      <geom name="pickup_tray_foot_right" pos="0 -0.10 0.006" size="0.075 0.015 0.006"/>
+      <geom name="pickup_tray_base" pos="0 0 0.022" size="0.105 0.155 0.010"/>
+      <geom name="pickup_tray_rim_front" pos="0.100 0 0.039" size="0.005 0.155 0.007"/>
+      <geom name="pickup_tray_rim_back" pos="-0.100 0 0.039" size="0.005 0.155 0.007"/>
+      <geom name="pickup_tray_rim_left" pos="0 0.150 0.039" size="0.095 0.005 0.007"/>
+      <geom name="pickup_tray_rim_right" pos="0 -0.150 0.039" size="0.095 0.005 0.007"/>
+    </body>
+
+    <!-- Each 35 mm cube has its own free joint for grasping. -->
+    <body name="cube_red_01" pos="0.50 -3.615 0.050">
+      <freejoint name="cube_red_01_joint"/>
+      <geom name="cube_red_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" mass="0.02" rgba="0.85 0.15 0.15 1"/>
+    </body>
+    <body name="cube_green_01" pos="0.50 -3.7 0.050">
+      <freejoint name="cube_green_01_joint"/>
+      <geom name="cube_green_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" mass="0.02" rgba="0.15 0.7 0.25 1"/>
+    </body>
+    <body name="cube_blue_01" pos="0.50 -3.785 0.050">
+      <freejoint name="cube_blue_01_joint"/>
+      <geom name="cube_blue_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" mass="0.02" rgba="0.15 0.3 0.85 1"/>
+    </body>
+
+    <frame pos="0 -3.7 0">
+      <attach model="moment" body="base_footprint" prefix=""/>
+    </frame>
+  </worldbody>
+</mujoco>
