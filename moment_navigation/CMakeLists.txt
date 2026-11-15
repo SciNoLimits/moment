@@ -16,6 +16,7 @@ find_package(tf2_geometry_msgs REQUIRED)
 
 # Build executable
 add_executable(go_to_goal
+  src/main.cpp
   src/go_to_goal.cpp
 )
 
