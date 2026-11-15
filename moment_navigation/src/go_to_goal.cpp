@@ -152,6 +152,12 @@ namespace moment_navigation
         // Configure callbacks
         rclcpp_action::Client<NavigateToPose>::SendGoalOptions options;
 
+        options.goal_response_callback = std::bind(
+            &GoToGoalServer::nav2_goal_response_callback,
+            this,
+            _1
+        );
+
         options.feedback_callback = std::bind(
             &GoToGoalServer::nav2_feedback_callback,
             this,
@@ -175,5 +181,48 @@ namespace moment_navigation
 
         
     }
+
+
+    void GoToGoalServer::nav2_goal_response_callback(
+        const NavigateToPoseHandle::SharedPtr & nav2_goal_handle)
+    {
+        if (!nav2_goal_handle)
+        {
+            RCLCPP_ERROR(
+                this->get_logger(),
+                "Nav2 rejected the navigation goal."
+            );
+
+            std::shared_ptr<GoToGoalHandle> goal_handle;
+
+            {
+                std::lock_guard<std::mutex> lock(goal_mutex_);
+                goal_handle = active_goal_handle_;
+                active_goal_handle_.reset();
+            }
+
+            if (goal_handle && goal_handle->is_active())
+            {
+                auto result = std::make_shared<GoToGoal::Result>();
+                result->success = false;
+                result->message = "Nav2 rejected the navigation goal.";
+
+                goal_handle->abort(result);
+            }
+
+            return;
+        }
+
+        {
+            std::lock_guard<std::mutex> lock(goal_mutex_);
+            nav2_goal_handle_ = nav2_goal_handle;
+        }
+
+        RCLCPP_INFO(
+            this->get_logger(),
+            "Nav2 accepted the navigation goal."
+        );
+    }
+
 
 } // namespace moment_navigation
