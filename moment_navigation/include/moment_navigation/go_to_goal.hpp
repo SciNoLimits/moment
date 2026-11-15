@@ -31,6 +31,22 @@ namespace moment_navigation
             // Nav2 action client: forwards navigation goals to Nav2
             rclcpp_action::Client<NavigateToPose>::SharedPtr nav2_client_;
 
+            // Called when a new goal arrives
+            rclcpp_action::GoalResponse handle_goal(
+                const rclcpp_action::GoalUUID & uuid,
+                std::shared_ptr<const GoToGoal::Goal> goal
+            );
+
+            // Called when the client requests cancellation
+            rclcpp_action::CancelResponse handle_cancel(
+                const std::shared_ptr<GoToGoalHandle> goal_handle
+            );
+
+            // Called after a goal has been accepted
+            void handle_accepted(
+                const std::shared_ptr<GoToGoalHandle> goal_handle
+            );
+
     };
 } // namespace moment_navigation
 
