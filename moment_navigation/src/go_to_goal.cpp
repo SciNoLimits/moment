@@ -231,5 +231,87 @@ namespace moment_navigation
 
         goal_handle->publish_feedback(feedback_msg);
     }
+    
+
+    void GoToGoalServer::nav2_result_callback(
+        const NavigateToPoseHandle::WrappedResult & result)
+    {
+        std::shared_ptr<GoToGoalHandle> goal_handle;
+
+        {
+            std::lock_guard<std::mutex> lock(goal_mutex_);
+
+            goal_handle = active_goal_handle_;
+
+            active_goal_handle_.reset();
+            nav2_goal_handle_.reset();
+        }
+
+        if (!goal_handle || !goal_handle->is_active())
+        {
+            RCLCPP_WARN(
+                this->get_logger(),
+                "Received Nav2 result, but the MOMENT goal is no longer active.");
+
+            return;
+        }
+
+        auto result_msg = std::make_shared<GoToGoal::Result>();
+
+        switch (result.code)
+        {
+            case rclcpp_action::ResultCode::SUCCEEDED:
+
+                result_msg->success = true;
+                result_msg->message = "Navigation completed successfully.";
+
+                goal_handle->succeed(result_msg);
+
+                RCLCPP_INFO(
+                    this->get_logger(),
+                    "Navigation completed successfully.");
+
+                break;
+
+            case rclcpp_action::ResultCode::CANCELED:
+
+                result_msg->success = false;
+                result_msg->message = "Navigation was canceled.";
+
+                goal_handle->canceled(result_msg);
+
+                RCLCPP_INFO(
+                    this->get_logger(),
+                    "Navigation was canceled.");
+
+                break;
+
+            case rclcpp_action::ResultCode::ABORTED:
+
+                result_msg->success = false;
+                result_msg->message = "Navigation failed. Nav2 aborted the goal.";
+
+                goal_handle->abort(result_msg);
+
+                RCLCPP_ERROR(
+                    this->get_logger(),
+                    "Navigation failed. Nav2 aborted the goal.");
+
+                break;
+
+            default:
+
+                result_msg->success = false;
+                result_msg->message = "Navigation returned an unknown result.";
+
+                goal_handle->abort(result_msg);
+
+                RCLCPP_ERROR(
+                    this->get_logger(),
+                    "Navigation returned an unknown result.");
+
+                break;
+        }
+    }
 
 } // namespace moment_navigation
