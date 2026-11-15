@@ -25,12 +25,16 @@ namespace moment_navigation
             using NavigateToPoseHandle = rclcpp_action::ClientGoalHandle<NavigateToPose>;
 
         private:
+
+            // ACTION SERVER AND CLIENT
             // Custom action server: receives goals from other MOMENT nodes
             rclcpp_action::Server<GoToGoal>::SharedPtr action_server_;
 
             // Nav2 action client: forwards navigation goals to Nav2
             rclcpp_action::Client<NavigateToPose>::SharedPtr nav2_client_;
 
+
+            // ACTION SERVER CALLBACKS
             // Called when a new goal arrives
             rclcpp_action::GoalResponse handle_goal(
                 const rclcpp_action::GoalUUID & uuid,
@@ -46,6 +50,35 @@ namespace moment_navigation
             void handle_accepted(
                 const std::shared_ptr<GoToGoalHandle> goal_handle
             );
+
+
+            // NAV2 COMMUNICATION CALLBACKS
+            // Send the accepted goal to Nav2
+            void send_navigation_goal(
+                const std::shared_ptr<GoToGoalHandle> goal_handle
+            );
+
+            // Receive feedback from Nav2
+            void nav2_feedback_callback(
+                NavigateToPoseHandle::SharedPtr nav2_goal_handle,
+                const std::shared_ptr<const NavigateToPose::Feedback> feedback
+            );
+
+            // Receive the final result from Nav2
+            void nav2_result_callback(
+                const NavigateToPoseHandle::WrappedResult & result
+            );
+
+
+            // GOAL TRACKING
+            // Track the currently active MOMENT goal
+            std::shared_ptr<GoToGoalHandle> active_goal_handle_;
+
+            // Track the corresponding Nav2 goal
+            NavigateToPoseHandle::SharedPtr nav2_goal_handle_;
+
+            // Protect shared goal state
+            std::mutex goal_mutex_;
 
     };
 } // namespace moment_navigation
