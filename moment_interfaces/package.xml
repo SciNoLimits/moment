@@ -3,9 +3,15 @@
 <package format="3">
   <name>moment_interfaces</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="sai.balaji@stud.th-deg.de">ubuntu</maintainer>
-  <license>TODO: License declaration</license>
+  <description>
+    Custom ROS 2 messages, services and actions
+    for the MOMENT autonomous mobile manipulation project.
+  </description>
+  <maintainer email="sai.balaji@stud.th-deg.de">Sai</maintainer>
+  <maintainer email="prajwal.dutta@stud.th-deg.de">SciNoLimits</maintainer>
+  <maintainer email="charan.kalyana-kumar@stud.th-deg.de">Charan</maintainer>
+
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
