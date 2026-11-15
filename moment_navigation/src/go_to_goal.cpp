@@ -36,7 +36,7 @@ namespace moment_navigation
     // Handle incoming goals
 
     rclcpp_action::GoalResponse GoToGoalServer::handle_goal(
-        const rclcpp_action::GoalUUID & uuid,
+        const rclcpp_action::GoalUUID &uuid,
         std::shared_ptr<const GoToGoal::Goal> goal)
     {
 
@@ -44,14 +44,13 @@ namespace moment_navigation
 
         std::lock_guard<std::mutex> lock(goal_mutex_);
 
-        const auto & orientation = goal->target_pose.pose.orientation;
+        const auto &orientation = goal->target_pose.pose.orientation;
 
         tf2::Quaternion q(
             orientation.x,
             orientation.y,
             orientation.z,
-            orientation.w  
-        );
+            orientation.w);
 
         double roll, pitch, yaw;
         tf2::Matrix3x3(q).getRPY(roll, pitch, yaw);
@@ -61,11 +60,9 @@ namespace moment_navigation
         {
             RCLCPP_WARN(
                 this->get_logger(),
-                "Another navigation goal is already active. Rejecting new goal."
-            );
+                "Another navigation goal is already active. Rejecting new goal.");
 
-        return rclcpp_action::GoalResponse::REJECT;
-
+            return rclcpp_action::GoalResponse::REJECT;
         }
 
         RCLCPP_INFO(
@@ -74,8 +71,7 @@ namespace moment_navigation
             goal->target_pose.pose.position.x,
             goal->target_pose.pose.position.y,
             yaw,
-            yaw * 180.0 / M_PI
-        );
+            yaw * 180.0 / M_PI);
 
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
@@ -87,21 +83,19 @@ namespace moment_navigation
     {
 
         std::lock_guard<std::mutex> lock(goal_mutex_);
-        
+
         if (active_goal_handle_ != goal_handle)
         {
             RCLCPP_WARN(
                 this->get_logger(),
-                "Cancellation requested for an inactive goal."
-            );
+                "Cancellation requested for an inactive goal.");
 
             return rclcpp_action::CancelResponse::REJECT;
         }
 
         RCLCPP_INFO(
             this->get_logger(),
-            "Cancellation requested for the active navigation goal."
-        );
+            "Cancellation requested for the active navigation goal.");
         return rclcpp_action::CancelResponse::ACCEPT;
     }
 
@@ -126,8 +120,7 @@ namespace moment_navigation
             RCLCPP_ERROR(
                 this->get_logger(),
 
-                "Nav2 NavigateToPose action server is not available."
-            );
+                "Nav2 NavigateToPose action server is not available.");
 
             GoToGoal::Result result;
             result.success = false;
@@ -139,8 +132,7 @@ namespace moment_navigation
             }
 
             goal_handle->abort(
-                std::make_shared<GoToGoal::Result>(result)
-            );
+                std::make_shared<GoToGoal::Result>(result));
 
             return;
         }
@@ -155,43 +147,35 @@ namespace moment_navigation
         options.goal_response_callback = std::bind(
             &GoToGoalServer::nav2_goal_response_callback,
             this,
-            _1
-        );
+            _1);
 
         options.feedback_callback = std::bind(
             &GoToGoalServer::nav2_feedback_callback,
             this,
             _1,
-            _2
-        );
+            _2);
 
         options.result_callback = std::bind(
             &GoToGoalServer::nav2_result_callback,
             this,
-            _1
-        );
+            _1);
 
         // Send goal to Nav2
         nav2_client_->async_send_goal(nav2_goal, options);
 
         RCLCPP_INFO(
             this->get_logger(),
-            "Navigation goal forwarded to Nav2."
-        );
-
-        
+            "Navigation goal forwarded to Nav2.");
     }
 
-
     void GoToGoalServer::nav2_goal_response_callback(
-        const NavigateToPoseHandle::SharedPtr & nav2_goal_handle)
+        const NavigateToPoseHandle::SharedPtr &nav2_goal_handle)
     {
         if (!nav2_goal_handle)
         {
             RCLCPP_ERROR(
                 this->get_logger(),
-                "Nav2 rejected the navigation goal."
-            );
+                "Nav2 rejected the navigation goal.");
 
             std::shared_ptr<GoToGoalHandle> goal_handle;
 
@@ -220,9 +204,32 @@ namespace moment_navigation
 
         RCLCPP_INFO(
             this->get_logger(),
-            "Nav2 accepted the navigation goal."
-        );
+            "Nav2 accepted the navigation goal.");
     }
 
+    void GoToGoalServer::nav2_feedback_callback(
+        NavigateToPoseHandle::SharedPtr nav2_goal_handle,
+        const std::shared_ptr<const NavigateToPose::Feedback> feedback)
+    {
+        (void)nav2_goal_handle;
+
+        std::shared_ptr<GoToGoalHandle> goal_handle;
+
+        {
+            std::lock_guard<std::mutex> lock(goal_mutex_);
+            goal_handle = active_goal_handle_;
+        }
+
+        if (!goal_handle || !goal_handle->is_active())
+        {
+            return;
+        }
+
+        auto feedback_msg = std::make_shared<GoToGoal::Feedback>();
+
+        feedback_msg->distance_remaining = feedback->distance_remaining;
+
+        goal_handle->publish_feedback(feedback_msg);
+    }
 
 } // namespace moment_navigation
