@@ -129,25 +129,23 @@ namespace moment_navigation
         const std::shared_ptr<GoToGoalHandle> goal_handle)
     {
         // Check weather Nav2 is available
-        if (!nav2_client_->wait_for_action_server(std::chrono::seconds(2)))
+        if (!nav2_client_->action_server_is_ready())
         {
             RCLCPP_ERROR(
                 this->get_logger(),
-
                 "Nav2 NavigateToPose action server is not available.");
 
-            GoToGoal::Result result;
-            result.success = false;
-            result.message = "Nav2 action server is unavailable.";
+            auto result = std::make_shared<GoToGoal::Result>();
+            result->success = false;
+            result->message = "Nav2 action server is unavailable.";
 
             {
                 std::lock_guard<std::mutex> lock(goal_mutex_);
                 active_goal_handle_.reset();
+                cancel_requested_ = false;
             }
 
-            goal_handle->abort(
-                std::make_shared<GoToGoal::Result>(result));
-
+            goal_handle->abort(result);
             return;
         }
 
