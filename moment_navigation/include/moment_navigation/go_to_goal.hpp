@@ -69,6 +69,12 @@ namespace moment_navigation
                 const NavigateToPoseHandle::WrappedResult & result
             );
 
+            // Receive the response from Nav2
+            void nav2_goal_response_callback(
+                const NavigateToPoseHandle::SharedPtr & nav2_goal_handle
+
+            );
+
 
             // GOAL TRACKING
             // Track the currently active MOMENT goal
