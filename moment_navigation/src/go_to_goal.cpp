@@ -81,21 +81,35 @@ namespace moment_navigation
     rclcpp_action::CancelResponse GoToGoalServer::handle_cancel(
         const std::shared_ptr<GoToGoalHandle> goal_handle)
     {
+        NavigateToPoseHandle::SharedPtr nav2_handle;
 
-        std::lock_guard<std::mutex> lock(goal_mutex_);
-
-        if (active_goal_handle_ != goal_handle)
         {
-            RCLCPP_WARN(
-                this->get_logger(),
-                "Cancellation requested for an inactive goal.");
+            std::lock_guard<std::mutex> lock(goal_mutex_);
 
-            return rclcpp_action::CancelResponse::REJECT;
+            if (active_goal_handle_ != goal_handle)
+            {
+                RCLCPP_WARN(
+                    this->get_logger(),
+                    "Cancellation requested for an inactive goal.");
+
+                return rclcpp_action::CancelResponse::REJECT;
+            }
+
+            cancel_requested_ = true;
+            nav2_handle = nav2_goal_handle_;
         }
 
         RCLCPP_INFO(
             this->get_logger(),
             "Cancellation requested for the active navigation goal.");
+
+        // If Nav2 has already accepted the goal, cancel it.
+        // Otherwise, cancellation will be forwarded later.
+        if (nav2_handle)
+        {
+            nav2_client_->async_cancel_goal(nav2_handle);
+        }
+
         return rclcpp_action::CancelResponse::ACCEPT;
     }
 
@@ -197,14 +211,27 @@ namespace moment_navigation
             return;
         }
 
+        bool should_cancel = false;
+
         {
             std::lock_guard<std::mutex> lock(goal_mutex_);
+
             nav2_goal_handle_ = nav2_goal_handle;
+            should_cancel = cancel_requested_;
         }
 
         RCLCPP_INFO(
             this->get_logger(),
             "Nav2 accepted the navigation goal.");
+
+        if (should_cancel)
+        {
+            RCLCPP_INFO(
+                this->get_logger(),
+                "Forwarding pending cancellation request to Nav2.");
+
+            nav2_client_->async_cancel_goal(nav2_goal_handle);
+        }
     }
 
     void GoToGoalServer::nav2_feedback_callback(
@@ -231,10 +258,9 @@ namespace moment_navigation
 
         goal_handle->publish_feedback(feedback_msg);
     }
-    
 
     void GoToGoalServer::nav2_result_callback(
-        const NavigateToPoseHandle::WrappedResult & result)
+        const NavigateToPoseHandle::WrappedResult &result)
     {
         std::shared_ptr<GoToGoalHandle> goal_handle;
 
@@ -245,6 +271,7 @@ namespace moment_navigation
 
             active_goal_handle_.reset();
             nav2_goal_handle_.reset();
+            cancel_requested_ = false;
         }
 
         if (!goal_handle || !goal_handle->is_active())
@@ -260,57 +287,57 @@ namespace moment_navigation
 
         switch (result.code)
         {
-            case rclcpp_action::ResultCode::SUCCEEDED:
+        case rclcpp_action::ResultCode::SUCCEEDED:
 
-                result_msg->success = true;
-                result_msg->message = "Navigation completed successfully.";
+            result_msg->success = true;
+            result_msg->message = "Navigation completed successfully.";
 
-                goal_handle->succeed(result_msg);
+            goal_handle->succeed(result_msg);
 
-                RCLCPP_INFO(
-                    this->get_logger(),
-                    "Navigation completed successfully.");
+            RCLCPP_INFO(
+                this->get_logger(),
+                "Navigation completed successfully.");
 
-                break;
+            break;
 
-            case rclcpp_action::ResultCode::CANCELED:
+        case rclcpp_action::ResultCode::CANCELED:
 
-                result_msg->success = false;
-                result_msg->message = "Navigation was canceled.";
+            result_msg->success = false;
+            result_msg->message = "Navigation was canceled.";
 
-                goal_handle->canceled(result_msg);
+            goal_handle->canceled(result_msg);
 
-                RCLCPP_INFO(
-                    this->get_logger(),
-                    "Navigation was canceled.");
+            RCLCPP_INFO(
+                this->get_logger(),
+                "Navigation was canceled.");
 
-                break;
+            break;
 
-            case rclcpp_action::ResultCode::ABORTED:
+        case rclcpp_action::ResultCode::ABORTED:
 
-                result_msg->success = false;
-                result_msg->message = "Navigation failed. Nav2 aborted the goal.";
+            result_msg->success = false;
+            result_msg->message = "Navigation failed. Nav2 aborted the goal.";
 
-                goal_handle->abort(result_msg);
+            goal_handle->abort(result_msg);
 
-                RCLCPP_ERROR(
-                    this->get_logger(),
-                    "Navigation failed. Nav2 aborted the goal.");
+            RCLCPP_ERROR(
+                this->get_logger(),
+                "Navigation failed. Nav2 aborted the goal.");
 
-                break;
+            break;
 
-            default:
+        default:
 
-                result_msg->success = false;
-                result_msg->message = "Navigation returned an unknown result.";
+            result_msg->success = false;
+            result_msg->message = "Navigation returned an unknown result.";
 
-                goal_handle->abort(result_msg);
+            goal_handle->abort(result_msg);
 
-                RCLCPP_ERROR(
-                    this->get_logger(),
-                    "Navigation returned an unknown result.");
+            RCLCPP_ERROR(
+                this->get_logger(),
+                "Navigation returned an unknown result.");
 
-                break;
+            break;
         }
     }
 

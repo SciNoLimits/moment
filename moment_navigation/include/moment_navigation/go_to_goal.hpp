@@ -86,6 +86,9 @@ namespace moment_navigation
             // Protect shared goal state
             std::mutex goal_mutex_;
 
+            // Tracks whether cancellation was requested before Nav2's goal handle became available.
+            bool cancel_requested_{false};
+
     };
 } // namespace moment_navigation
 
