@@ -67,7 +67,7 @@ namespace moment_navigation
 
         RCLCPP_INFO(
             this->get_logger(),
-            "Received navigation goal: x=%.2f, y=%.2, yaw=%.2f rad (%.2f deg)",
+            "Received navigation goal: x=%.2f, y=%.2f, yaw=%.2f rad (%.2f deg)",
             goal->target_pose.pose.position.x,
             goal->target_pose.pose.position.y,
             yaw,
@@ -135,17 +135,31 @@ namespace moment_navigation
                 this->get_logger(),
                 "Nav2 NavigateToPose action server is not available.");
 
-            auto result = std::make_shared<GoToGoal::Result>();
-            result->success = false;
-            result->message = "Nav2 action server is unavailable.";
+            bool cancellation_requested = false;
 
             {
                 std::lock_guard<std::mutex> lock(goal_mutex_);
+
+                cancellation_requested = cancel_requested_;
+
                 active_goal_handle_.reset();
                 cancel_requested_ = false;
             }
 
-            goal_handle->abort(result);
+            auto result = std::make_shared<GoToGoal::Result>();
+
+            result->success = false;
+            result->message = "Nav2 action server is unavailable.";
+
+            if (cancellation_requested)
+            {
+                goal_handle->canceled(result);
+            }
+            else
+            {
+                goal_handle->abort(result);
+            }
+
             return;
         }
 
