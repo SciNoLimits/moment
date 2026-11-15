@@ -261,27 +261,46 @@ namespace moment_navigation
         const NavigateToPoseHandle::WrappedResult &result)
     {
         std::shared_ptr<GoToGoalHandle> goal_handle;
+        bool cancellation_requested = false;
 
         {
             std::lock_guard<std::mutex> lock(goal_mutex_);
 
             goal_handle = active_goal_handle_;
+            cancellation_requested = cancel_requested_;
 
             active_goal_handle_.reset();
             nav2_goal_handle_.reset();
             cancel_requested_ = false;
         }
 
-        if (!goal_handle || !goal_handle->is_active())
+        if (!goal_handle)
         {
             RCLCPP_WARN(
                 this->get_logger(),
-                "Received Nav2 result, but the MOMENT goal is no longer active.");
-
+                "Received Nav2 result, but no active MOMENT goal exists.");
             return;
         }
 
         auto result_msg = std::make_shared<GoToGoal::Result>();
+
+        // Handle an already accepted cancellation request.
+        if (cancellation_requested)
+        {
+            result_msg->success = false;
+            result_msg->message =
+                "Navigation cancellation was requested.";
+
+            goal_handle->canceled(result_msg);
+
+            RCLCPP_INFO(
+                this->get_logger(),
+                "MOMENT navigation goal canceled.");
+
+            return;
+        }
+
+        // Keep your existing switch statement here.
 
         switch (result.code)
         {
