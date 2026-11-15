@@ -190,20 +190,35 @@ namespace moment_navigation
                 "Nav2 rejected the navigation goal.");
 
             std::shared_ptr<GoToGoalHandle> goal_handle;
+            bool cancellation_requested = false;
 
             {
                 std::lock_guard<std::mutex> lock(goal_mutex_);
+
                 goal_handle = active_goal_handle_;
+                cancellation_requested = cancel_requested_;
+
                 active_goal_handle_.reset();
+                cancel_requested_ = false;
             }
 
             if (goal_handle && goal_handle->is_active())
             {
                 auto result = std::make_shared<GoToGoal::Result>();
-                result->success = false;
-                result->message = "Nav2 rejected the navigation goal.";
 
-                goal_handle->abort(result);
+                result->success = false;
+                result->message = cancellation_requested
+                                      ? "Navigation canceled before Nav2 accepted the goal."
+                                      : "Nav2 rejected the navigation goal.";
+
+                if (cancellation_requested)
+                {
+                    goal_handle->canceled(result);
+                }
+                else
+                {
+                    goal_handle->abort(result);
+                }
             }
 
             return;
