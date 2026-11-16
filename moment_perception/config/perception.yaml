@@ -6,8 +6,8 @@ color_detector:
     # bridged by sim/camera_bridge.yaml. For a real RealSense use:
     #   /camera/camera/color/image_raw, /camera/camera/aligned_depth_to_color/image_raw,
     #   /camera/camera/color/camera_info  and depth_scale 0.001
-    rgb_topic: /camera/image
-    depth_topic: /camera/depth_image
+    rgb_topic: /camera/image_raw
+    depth_topic: /camera/depth/image_raw
     info_topic: /camera/camera_info
     depth_scale: 1.0
 
