@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'color_detector = moment_perception.detector_node:main',
+            'accuracy_sweep = moment_perception.accuracy_sweep:main',
         ],
     },
 )
