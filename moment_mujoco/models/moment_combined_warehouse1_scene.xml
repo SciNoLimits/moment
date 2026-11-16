@@ -128,7 +128,7 @@
       <geom name="cube_blue_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" mass="0.02" rgba="0.15 0.3 0.85 1"/>
     </body>
 
-    <frame pos="0 -3.7 0">
+    <frame pos="0.25 -3.7 0">
       <attach model="moment" body="base_footprint" prefix=""/>
     </frame>
   </worldbody>
