@@ -1,0 +1,111 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mxfile host="app.diagrams.net">
+  <diagram id="components" name="ROS 2 node diagram">
+    <mxGraphModel grid="1" gridSize="10" page="1" pageScale="1" pageWidth="1260" pageHeight="810" background="#ffffff">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" value="Warehouse mission · ROS 2 nodes and endpoints" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=26;fontStyle=1;">
+          <mxGeometry x="42" y="25" width="1160" height="47" as="geometry" />
+        </mxCell>
+        <mxCell id="note" value="Proposed endpoint names" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontColor=#525c69;">
+          <mxGeometry x="42" y="73" width="580" height="28" as="geometry" />
+        </mxCell>
+        <mxCell id="entry" value="«client»&lt;br&gt;&lt;b&gt;Mission Client&lt;/b&gt;" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;swimlane;horizontal=1;startSize=52;rounded=0;fillColor=#f4f5f7;swimlaneFillColor=#ffffff;strokeColor=#3e4650;strokeWidth=1.2;whiteSpace=wrap;collapsible=0;container=1;">
+          <mxGeometry x="42" y="120" width="250" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="orch" value="«ROS 2 node»&lt;br&gt;&lt;b&gt;Mission Orchestrator&lt;/b&gt;" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;swimlane;horizontal=1;startSize=52;rounded=0;fillColor=#f4f5f7;swimlaneFillColor=#ffffff;strokeColor=#3e4650;strokeWidth=1.2;whiteSpace=wrap;collapsible=0;container=1;">
+          <mxGeometry x="42" y="370" width="250" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="orch-endpoint0" value="«action» /sort_cube" vertex="1" parent="orch" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;whiteSpace=wrap;">
+          <mxGeometry x="8" y="54" width="234" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="vision" value="«ROS 2 node»&lt;br&gt;&lt;b&gt;Object Detection&lt;/b&gt;" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;swimlane;horizontal=1;startSize=52;rounded=0;fillColor=#f4f5f7;swimlaneFillColor=#ffffff;strokeColor=#3e4650;strokeWidth=1.2;whiteSpace=wrap;collapsible=0;container=1;">
+          <mxGeometry x="510" y="203" width="230" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="vision-endpoint0" value="«service» /detect_object" vertex="1" parent="vision" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;whiteSpace=wrap;">
+          <mxGeometry x="8" y="54" width="214" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="nav" value="«ROS 2 node»&lt;br&gt;&lt;b&gt;Navigation&lt;/b&gt;" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;swimlane;horizontal=1;startSize=52;rounded=0;fillColor=#f4f5f7;swimlaneFillColor=#ffffff;strokeColor=#3e4650;strokeWidth=1.2;whiteSpace=wrap;collapsible=0;container=1;">
+          <mxGeometry x="510" y="370" width="230" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="nav-endpoint0" value="«action» /navigate_to_bay" vertex="1" parent="nav" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;whiteSpace=wrap;">
+          <mxGeometry x="8" y="54" width="214" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="manip" value="«ROS 2 node»&lt;br&gt;&lt;b&gt;Manipulation&lt;/b&gt;" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;swimlane;horizontal=1;startSize=52;rounded=0;fillColor=#f4f5f7;swimlaneFillColor=#ffffff;strokeColor=#3e4650;strokeWidth=1.2;whiteSpace=wrap;collapsible=0;container=1;">
+          <mxGeometry x="510" y="537" width="230" height="112" as="geometry" />
+        </mxCell>
+        <mxCell id="manip-endpoint0" value="«action» /pick" vertex="1" parent="manip" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;whiteSpace=wrap;">
+          <mxGeometry x="8" y="54" width="214" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="manip-endpoint1" value="«action» /place" vertex="1" parent="manip" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;whiteSpace=wrap;">
+          <mxGeometry x="8" y="79" width="214" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="camera" value="«ROS 2 node»&lt;br&gt;&lt;b&gt;Camera&lt;/b&gt;" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;swimlane;horizontal=1;startSize=52;rounded=0;fillColor=#f4f5f7;swimlaneFillColor=#ffffff;strokeColor=#3e4650;strokeWidth=1.2;whiteSpace=wrap;collapsible=0;container=1;">
+          <mxGeometry x="960" y="203" width="230" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="camera-endpoint0" value="«topic» /camera/image_raw" vertex="1" parent="camera" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;whiteSpace=wrap;">
+          <mxGeometry x="8" y="54" width="214" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="nav2" value="«ROS 2 node»&lt;br&gt;&lt;b&gt;Nav2&lt;/b&gt;" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;swimlane;horizontal=1;startSize=52;rounded=0;fillColor=#f4f5f7;swimlaneFillColor=#ffffff;strokeColor=#3e4650;strokeWidth=1.2;whiteSpace=wrap;collapsible=0;container=1;">
+          <mxGeometry x="960" y="370" width="230" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="nav2-endpoint0" value="«action» /navigate_to_pose" vertex="1" parent="nav2" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;whiteSpace=wrap;">
+          <mxGeometry x="8" y="54" width="214" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="moveit" value="«ROS 2 node»&lt;br&gt;&lt;b&gt;MoveIt&lt;/b&gt;" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;swimlane;horizontal=1;startSize=52;rounded=0;fillColor=#f4f5f7;swimlaneFillColor=#ffffff;strokeColor=#3e4650;strokeWidth=1.2;whiteSpace=wrap;collapsible=0;container=1;">
+          <mxGeometry x="960" y="537" width="230" height="87" as="geometry" />
+        </mxCell>
+        <mxCell id="moveit-endpoint0" value="«action» /move_action" vertex="1" parent="moveit" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;whiteSpace=wrap;">
+          <mxGeometry x="8" y="54" width="214" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="mission" value="«send goal»" source="entry" target="orch" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;fontSize=13;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#424a54;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=0.5;exitY=1;entryX=0.5;entryY=0;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="57" y="0" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="detect" value="«call»" source="orch" target="vision" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;fontSize=13;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#424a54;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.2;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="375" y="387" />
+              <mxPoint x="375" y="246" />
+            </Array>
+            <mxPoint x="0" y="-62" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="navigate" value="«send goal»" source="orch" target="nav" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;fontSize=13;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#424a54;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-13" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="pickplace" value="«send goal»" source="orch" target="manip" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;fontSize=13;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#424a54;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.8;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="375" y="440" />
+              <mxPoint x="375" y="593" />
+            </Array>
+            <mxPoint x="0" y="59" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="images" value="«publish»" source="camera" target="vision" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;fontSize=13;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#424a54;labelBackgroundColor=#ffffff;dashed=0;endArrow=open;endFill=0;exitX=0;exitY=0.5;entryX=1;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-13" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="nav2goal" value="«send goal»" source="nav" target="nav2" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;fontSize=13;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#424a54;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.5;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-13" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="movegoal" value="«send goal»" source="manip" target="moveit" edge="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;fontSize=13;edgeStyle=orthogonalEdgeStyle;rounded=0;strokeColor=#424a54;labelBackgroundColor=#ffffff;dashed=1;endArrow=open;endFill=0;exitX=1;exitY=0.4;entryX=0;entryY=0.5;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-13" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend" value="Dashed arrow · client to endpoint provider     |     Solid arrow · topic publisher to subscriber" vertex="1" parent="1" style="html=1;fontFamily=Helvetica;fontSize=15;fontColor=#20252c;text;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=14;fontColor=#525c69;">
+          <mxGeometry x="42" y="718" width="1160" height="36" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
