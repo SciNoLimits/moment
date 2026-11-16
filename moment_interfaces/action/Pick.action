@@ -1,0 +1,7 @@
+# Pose of the object in the frame given by header.frame_id.
+geometry_msgs/PoseStamped object_pose
+---
+bool success
+string message
+---
+string stage
