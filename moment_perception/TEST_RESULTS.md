@@ -59,3 +59,27 @@ Cubes 10 cm apart: red +0.10, green 0, blue −0.10 (robot frame). Raw data: `do
 - **Open issue:** green missed at 1.5 m while red/blue at the same distance were found.
   Candidate causes: blob below `min_area_px` (green faces the camera head-on, no side face visible),
   size-gate noise, or the shaded front face falling below the V threshold. Investigated in Run 4.
+
+## Run 4: why green was missed at 1.5 m, 2026-11-17
+
+One setting changed per experiment, cubes at 1.5 m:
+
+| Experiment | Change | Green found? |
+|---|---|---|
+| A | `min_area_px` 150 → 50 | ❌ (blob size not the cause; blob ≈ 224 px) |
+| B | `max_object_size` 0.08 → 1.0 | ✅ 2.5 mm error (size gate was rejecting it) |
+
+Blob diagnostic, one frame (5–95 percentile extent, cm):
+
+| Cube | All pixels x/y/z | Eroded 3 px x/y/z |
+|---|---|---|
+| red | 4.0 / 4.0 / 0.7 | 2.4 / 2.4 / 0.0 |
+| green | 4.1 / 4.0 / **5.3** | 2.4 / 2.4 / 0.0 |
+| blue | 3.7 / 4.0 / 0.7 | 2.1 / 2.4 / 0.0 |
+
+**Cause:** edge pixels of the blob are green in colour but carry the depth of the background
+behind the cube, stretching the depth (z) extent. It varies per frame (5.3 cm here, above
+8 cm in the sweep frames), so the cube flipped to "too big". Only green was affected:
+it sits straight ahead, with a different background behind its edges.
+**Fix:** measure size on the eroded blob (same pixels as the position) and add the trimmed
+edge width back for x and y.
