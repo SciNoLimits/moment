@@ -1,20 +1,26 @@
 from launch import LaunchDescription
-# from launch.actions import RegisterEventHandler
-# from launch.event_handlers import OnProcessExit
-from launch.substitutions import Command
+from launch.actions import DeclareLaunchArgument
+from launch.substitutions import Command, PathJoinSubstitution, LaunchConfiguration
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
 from launch_ros.substitutions import FindPackageShare
-from launch.substitutions import PathJoinSubstitution
 
 
 def generate_launch_description():
-    description_share = FindPackageShare("moment_description")
+    description_share = FindPackageShare("moment_mujoco")
+    
+    scene_arg = DeclareLaunchArgument(
+        "scene",
+        default_value="moment_static_warehouse_scene.xml",
+        description="MuJoCo scene XML filename inside moment_mujoco/models/",
+    )
+    
+    scene = LaunchConfiguration("scene")
 
     xacro_file = PathJoinSubstitution([
         description_share,
         "urdf",
-        "moment.urdf.xacro",
+        "moment_mujoco.urdf.xacro",
     ])
 
     controllers_file = PathJoinSubstitution([
@@ -24,14 +30,14 @@ def generate_launch_description():
     ])
 
     plugins_file = PathJoinSubstitution([
-        description_share,
-        "config",
-        "mujoco_ros2_control_plugins.yaml",
+        description_share, 
+        "config", 
+        "moment_mujoco_plugins.yaml"
     ])
 
     robot_description = {
         "robot_description": ParameterValue(
-            Command(["xacro ", xacro_file]),
+            Command(["xacro ", xacro_file, " scene:=", scene]),
             value_type=str,
         )
     }
@@ -82,9 +88,28 @@ def generate_launch_description():
         output="screen",
     )
 
+    diff_drive_spawner = Node(
+      package="controller_manager", executable="spawner",
+      arguments=["diff_drive_controller", "-c", "/controller_manager",
+                 "--controller-ros-args",
+                 "-r /diff_drive_controller/cmd_vel:=/cmd_vel -r /diff_drive_controller/odom:=/odom"],
+      output="screen",
+    )
+
+    imu_spawner = Node(
+        package="controller_manager", executable="spawner",
+        arguments=["imu_sensor_broadcaster", "-c", "/controller_manager",
+                "--controller-ros-args", "-r /imu_sensor_broadcaster/imu:=/imu"],
+        output="screen",
+    )
+
+
     return LaunchDescription([
+        scene_arg,
         robot_state_publisher,
         control_node,
         joint_state_spawner,
         arm_controller_spawner,
+        diff_drive_spawner,
+        imu_spawner,
     ])
