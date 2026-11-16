@@ -83,3 +83,24 @@ behind the cube, stretching the depth (z) extent. It varies per frame (5.3 cm he
 it sits straight ahead, with a different background behind its edges.
 **Fix:** measure size on the eroded blob (same pixels as the position) and add the trimmed
 edge width back for x and y.
+
+## Run 5: distance sweep after the eroded-size fix, 2026-11-17
+
+Same setup as Run 3. Raw data: `docs/run5_distance_sweep.csv`.
+
+| Distance (m) | red (mm) | green (mm) | blue (mm) |
+|---|---|---|---|
+| 0.30 | 3.6 | 0.6 | 2.9 |
+| 0.40 | 2.9 | 0.6 | 1.8 |
+| 0.50 | 2.5 | 0.7 | 1.1 |
+| 0.60 | 2.8 | 1.4 | 0.8 |
+| 0.80 | 2.3 | 1.3 | 0.3 |
+| 1.00 | 2.5 | 2.5 | 0.7 |
+| 1.20 | 3.3 | 2.0 | 0.6 |
+| 1.50 | 3.9 | 2.5 | 2.4 |
+
+- **24/24 found** (Run 3: 23/24). Worst error 3.9 mm, mean ≈ 1.9 mm.
+- Positions are identical to Run 3: the fix only changes which blobs pass the size gate.
+- Red (+0.10 m sideways) is consistently the largest error (2.3–3.9 mm). Likely cause: the
+  surface-to-centre push points along the viewing ray, which has a sideways component for
+  off-centre cubes. To be checked with the side-angle sweep.
