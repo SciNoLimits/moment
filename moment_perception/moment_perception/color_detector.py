@@ -106,18 +106,33 @@ def deproject_blob(blob: np.ndarray, depth_m: np.ndarray, fx: float, fy: float,
 
 
 def blob_size_m(blob: np.ndarray, depth_m: np.ndarray, fx: float, fy: float,
-                cx: float, cy: float, min_depth: float, max_depth: float) -> Optional[float]:
-    """Physical size of a blob: the largest 5-95 percentile extent of its 3-D points along
-    x, y or z (camera frame). A 4 cm cube gives ~0.03-0.05 m; a 1.5 m floor zone gives > 0.3 m."""
-    vs, us = np.nonzero(blob)
+                cx: float, cy: float, min_depth: float, max_depth: float,
+                erode_px: int = 3) -> Optional[float]:
+    """Physical size of a blob in metres (largest 5-95 percentile extent along x, y or z).
+
+    Measured on the ERODED blob, like the position: edge pixels can carry the depth of
+    whatever is behind the object, which inflated the z extent of a 4 cm cube at 1.5 m to
+    5-8+ cm (Run 4). The trimmed edge is added back to x and y (erode_px pixels per side,
+    converted to metres at the blob's depth), so a 4 cm cube still measures ~4 cm.
+    """
+    used = blob
+    trim = 0
+    if erode_px > 0:
+        inner = cv2.erode(blob, np.ones((2 * erode_px + 1, 2 * erode_px + 1), np.uint8))
+        if cv2.countNonZero(inner) >= 5:
+            used, trim = inner, erode_px
+    vs, us = np.nonzero(used)
     z = depth_m[vs, us]
     ok = (z > min_depth) & (z < max_depth)
     if ok.sum() < 5:
         return None
     us, vs, z = us[ok].astype(np.float64), vs[ok].astype(np.float64), z[ok].astype(np.float64)
     pts = np.stack([(us - cx) * z / fx, (vs - cy) * z / fy, z])
-    lo, hi = np.percentile(pts, 5, axis=1), np.percentile(pts, 95, axis=1)
-    return float(np.max(hi - lo))
+    ext = np.percentile(pts, 95, axis=1) - np.percentile(pts, 5, axis=1)
+    zm = float(np.median(z))
+    ext[0] += 2 * trim * zm / fx
+    ext[1] += 2 * trim * zm / fy
+    return float(np.max(ext))
 
 
 def detect(bgr: np.ndarray, depth_m: np.ndarray, K: Sequence[float],
@@ -137,7 +152,7 @@ def detect(bgr: np.ndarray, depth_m: np.ndarray, K: Sequence[float],
     for name, rng in colors.items():
         out[name] = None
         for blob, contour in candidate_blobs(color_mask(hsv, rng), min_area):
-            size = blob_size_m(blob, depth_m, fx, fy, cx, cy, min_depth, max_depth)
+            size = blob_size_m(blob, depth_m, fx, fy, cx, cy, min_depth, max_depth, erode_px)
             if size is not None and not (min_size_m <= size <= max_size_m):
                 continue                                   # wrong size: zone or speck
             m = cv2.moments(contour)

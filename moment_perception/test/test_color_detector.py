@@ -140,3 +140,30 @@ def test_size_gate_only_zone_gives_not_found():
     img, depth = make_scene([])
     add_floor_patch(img, depth, 'green', 1.3, 1.9, 0.3)
     assert detect(img, depth, K, DEFAULT_COLORS, min_size_m=0.015, max_size_m=0.08)['green'] is None
+
+
+# ---------- Run 4: edge pixels with background depth must not inflate the size ----------
+def far_cube_with_bad_edges(bad_depth):
+    """4 cm green cube at 1.5 m whose 1-px outer ring has the depth of something behind it."""
+    img, depth = make_scene([('green', 0.0, 0.0, 1.5, 0.04)])
+    mask = np.all(img == BGR['green'], axis=2).astype(np.uint8) * 255
+    ring = mask & ~cv2.erode(mask, np.ones((3, 3), np.uint8))
+    depth[ring > 0] = bad_depth
+    return img, depth
+
+
+def test_size_ignores_edge_depth():
+    from moment_perception.color_detector import blob_size_m, candidate_blobs, color_mask
+    img, depth = far_cube_with_bad_edges(1.9)
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    blob, _ = candidate_blobs(color_mask(hsv, DEFAULT_COLORS['green']), 50)[0]
+    full = blob_size_m(blob, depth, FX, FY, CX, CY, 0.1, 4.0, erode_px=0)
+    eroded = blob_size_m(blob, depth, FX, FY, CX, CY, 0.1, 4.0, erode_px=3)
+    assert full > 0.08                      # old behaviour: edge depth inflates the size
+    assert 0.03 <= eroded <= 0.05           # new: ~4 cm
+
+
+def test_far_cube_with_bad_edges_is_detected():
+    img, depth = far_cube_with_bad_edges(1.9)
+    d = detect(img, depth, K, DEFAULT_COLORS, min_size_m=0.015, max_size_m=0.08)['green']
+    assert d is not None and abs(d.point_cam[2] - 1.5) < 0.03
