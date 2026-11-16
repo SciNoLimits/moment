@@ -24,6 +24,8 @@ color_detector:
     min_area_px: 150          # smaller blobs are noise
     min_depth: 0.1            # metres; ignore readings closer/further than this
     max_depth: 4.0
+    min_object_size: 0.015      # metres; smaller = specks
+    max_object_size: 0.08       # metres; larger = floor zones, bays, walls
     erode_px: 3               # drop blob edges, where depth mixes object and background
     # What point is returned. 'center' = cube centre for grasping (manipulation needs this).
     #   x, y: visible surface pushed half a cube horizontally away from the camera

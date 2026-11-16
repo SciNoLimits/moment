@@ -95,3 +95,48 @@ def test_colors_from_params():
     assert len(c['red'].ranges) == 2
     with pytest.raises(ValueError):
         colors_from_params({'bad': [1, 2, 3]})
+
+
+# ---------- size gate: same-coloured floor zone must not beat the cube ----------
+CAM_H = 0.103            # camera height above the floor (team's MuJoCo camera)
+
+
+def add_floor_patch(img, depth, color, x0, x1, half_width):
+    """Draw a flat floor patch from distance x0 to x1 (metres ahead), +-half_width sideways.
+    Camera looks horizontally from CAM_H, so a floor row v sits at depth Z = CAM_H*FY/(v-CY)."""
+    v_far = int(np.ceil(CY + CAM_H * FY / x1))
+    v_near = int(np.floor(CY + CAM_H * FY / x0))
+    for v in range(v_far, min(v_near, H - 1) + 1):
+        z = CAM_H * FY / (v - CY)
+        du = half_width * FX / z
+        u0, u1 = int(max(0, CX - du)), int(min(W, CX + du))
+        img[v, u0:u1] = BGR[color]
+        depth[v, u0:u1] = z
+
+
+def zone_scene():
+    # green cube at 0.5 m (front face 0.48 m), centred low in the image; patch 1.3-1.9 m ahead
+    img, depth = make_scene([('green', 0.0, CAM_H - 0.02, 0.48, 0.04)])
+    add_floor_patch(img, depth, 'green', 1.3, 1.9, 0.3)
+    return img, depth
+
+
+def test_floor_zone_wins_without_size_gate():
+    """Documents the bug found in the MuJoCo test scene: the bigger zone blob is chosen."""
+    img, depth = zone_scene()
+    d = detect(img, depth, K, DEFAULT_COLORS)['green']
+    assert d.point_cam[2] > 1.2                     # picked the patch, not the cube
+
+
+def test_size_gate_rejects_floor_zone():
+    img, depth = zone_scene()
+    d = detect(img, depth, K, DEFAULT_COLORS, min_size_m=0.015, max_size_m=0.08)['green']
+    assert d is not None
+    assert abs(d.point_cam[2] - 0.48) < 0.02        # the cube
+    assert 0.015 <= d.size_m <= 0.08
+
+
+def test_size_gate_only_zone_gives_not_found():
+    img, depth = make_scene([])
+    add_floor_patch(img, depth, 'green', 1.3, 1.9, 0.3)
+    assert detect(img, depth, K, DEFAULT_COLORS, min_size_m=0.015, max_size_m=0.08)['green'] is None

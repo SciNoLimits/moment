@@ -67,11 +67,14 @@ class ColorDetectorNode(Node):
         p('min_depth', 0.1)
         p('max_depth', 4.0)
         p('erode_px', 3)
+        p('min_object_size', 0.015)        # metres; smaller blobs are specks / far noise
+        p('max_object_size', 0.08)         # metres; larger blobs are floor zones, walls, bays
         p('output_point', 'center')        # 'center' = cube centre (for grasping), 'surface' = visible surface
-        p('cube_size', 0.03)               # metres, edge length
+        p('cube_size', 0.04)               # metres, edge length
         p('cube_on_ground', True)          # True: centre z = ground_z + cube_size/2 (exact)
         p('ground_z', 0.0)                 # height of the surface the cubes rest on, in target_frame
         p('max_frame_age', 1.0)            # seconds; older frames are rejected by the services
+        p('tf_latest_fallback', False)     # True only if the robot is guaranteed to stand still
         p('continuous', False)             # True: detect + publish on every frame
         p('publish_debug_image', True)
 
@@ -84,10 +87,13 @@ class ColorDetectorNode(Node):
         self.min_area = int(g('min_area_px'))
         self.min_depth, self.max_depth = float(g('min_depth')), float(g('max_depth'))
         self.erode_px = int(g('erode_px'))
+        self.min_size = float(g('min_object_size'))
+        self.max_size = float(g('max_object_size'))
         self.output_center = str(g('output_point')).lower() == 'center'
         self.cube_size = float(g('cube_size'))
         self.ground_z = float(g('ground_z')) if bool(g('cube_on_ground')) else None
         self.max_age = float(g('max_frame_age'))
+        self.tf_fallback = bool(g('tf_latest_fallback'))
         self.continuous = bool(g('continuous'))
         self.debug = bool(g('publish_debug_image'))
 
@@ -158,7 +164,8 @@ class ColorDetectorNode(Node):
             self.get_logger().error('depth and colour sizes differ: depth must be registered to colour')
             return {}
         dets = detect(bgr, depth, self.K, {c: self.colors[c] for c in names},
-                      self.min_area, self.min_depth, self.max_depth, self.erode_px)
+                      self.min_area, self.min_depth, self.max_depth, self.erode_px,
+                      self.min_size, self.max_size)
 
         out, markers = {}, MarkerArray()
         for i, c in enumerate(names):
@@ -173,11 +180,17 @@ class ColorDetectorNode(Node):
                 tf = self.tf_buffer.lookup_transform(self.target_frame, rgb_msg.header.frame_id,
                                                      Time.from_msg(rgb_msg.header.stamp),
                                                      timeout=Duration(seconds=0.2))
-            except TransformException:
-                try:   # fall back to latest transform (robot is standing still while detecting)
+            except TransformException as e:
+                # In 'map' the robot may be moving: a transform from a different time would put the
+                # cube in the wrong place, so by default we refuse instead of guessing.
+                if not self.tf_fallback:
+                    self.get_logger().warn(f'TF {rgb_msg.header.frame_id} -> {self.target_frame} '
+                                           f'at image time failed: {e}')
+                    continue
+                try:
                     tf = self.tf_buffer.lookup_transform(self.target_frame, rgb_msg.header.frame_id, Time())
-                except TransformException as e:
-                    self.get_logger().warn(f'TF {rgb_msg.header.frame_id} -> {self.target_frame}: {e}')
+                except TransformException as e2:
+                    self.get_logger().warn(f'TF {rgb_msg.header.frame_id} -> {self.target_frame}: {e2}')
                     continue
             p = do_transform_point(ps, tf).point
             if self.output_center:
@@ -223,6 +236,8 @@ class ColorDetectorNode(Node):
             cv2.rectangle(img, (x, y), (x + w, y + h), col, 2)
             cv2.circle(img, (int(d.pixel[0]), int(d.pixel[1])), 4, col, -1)
             label = c if c not in out else f'{c} ({out[c][0]:.2f}, {out[c][1]:.2f}, {out[c][2]:.2f})'
+            if d.size_m is not None:
+                label += f' {d.size_m * 100:.0f}cm'
             if d.point_cam is None:
                 label += ' no depth'
             cv2.putText(img, label, (x, max(15, y - 6)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, col, 2)

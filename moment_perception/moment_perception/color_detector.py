@@ -32,6 +32,7 @@ class Detection:
     point_cam: Optional[np.ndarray]     # (x, y, z) in camera optical frame, metres; None if no valid depth
     valid_depth_px: int                 # pixels that contributed to the 3-D estimate
     bbox: Tuple[int, int, int, int]     # x, y, w, h
+    size_m: Optional[float] = None      # estimated physical size of the blob (metres)
 
 
 DEFAULT_COLORS: Dict[str, ColorRange] = {
@@ -64,6 +65,19 @@ def largest_blob(mask: np.ndarray, min_area: int):
     return blob, best
 
 
+def candidate_blobs(mask: np.ndarray, min_area: int):
+    """All blobs above min_area as (blob_mask, contour), largest first."""
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted((c for c in contours if cv2.contourArea(c) >= min_area),
+                      key=cv2.contourArea, reverse=True)
+    out = []
+    for c in contours:
+        blob = np.zeros_like(mask)
+        cv2.drawContours(blob, [c], -1, 255, thickness=cv2.FILLED)
+        out.append((blob, c))
+    return out
+
+
 def depth_to_meters(depth: np.ndarray, depth_scale: float) -> np.ndarray:
     """32FC1 is already metres (Gazebo). 16UC1 is millimetres (RealSense): pass depth_scale=0.001."""
     d = depth.astype(np.float32) * depth_scale
@@ -91,24 +105,47 @@ def deproject_blob(blob: np.ndarray, depth_m: np.ndarray, fx: float, fy: float,
     return pt, int(ok.sum())
 
 
+def blob_size_m(blob: np.ndarray, depth_m: np.ndarray, fx: float, fy: float,
+                cx: float, cy: float, min_depth: float, max_depth: float) -> Optional[float]:
+    """Physical size of a blob: the largest 5-95 percentile extent of its 3-D points along
+    x, y or z (camera frame). A 4 cm cube gives ~0.03-0.05 m; a 1.5 m floor zone gives > 0.3 m."""
+    vs, us = np.nonzero(blob)
+    z = depth_m[vs, us]
+    ok = (z > min_depth) & (z < max_depth)
+    if ok.sum() < 5:
+        return None
+    us, vs, z = us[ok].astype(np.float64), vs[ok].astype(np.float64), z[ok].astype(np.float64)
+    pts = np.stack([(us - cx) * z / fx, (vs - cy) * z / fy, z])
+    lo, hi = np.percentile(pts, 5, axis=1), np.percentile(pts, 95, axis=1)
+    return float(np.max(hi - lo))
+
+
 def detect(bgr: np.ndarray, depth_m: np.ndarray, K: Sequence[float],
            colors: Dict[str, ColorRange], min_area: int = 150,
            min_depth: float = 0.1, max_depth: float = 4.0,
-           erode_px: int = 3) -> Dict[str, Optional[Detection]]:
-    """Detect each colour's largest blob and its 3-D position. K = row-major 3x3 intrinsics."""
+           erode_px: int = 3, min_size_m: float = 0.0,
+           max_size_m: float = float('inf')) -> Dict[str, Optional[Detection]]:
+    """Detect each colour's object and its 3-D position. K = row-major 3x3 intrinsics.
+
+    Blobs are tried largest first; the first whose physical size lies in
+    [min_size_m, max_size_m] wins. This rejects same-coloured floor zones (too big)
+    and specks (too small). With the default limits every blob passes (old behaviour).
+    """
     fx, fy, cx, cy = K[0], K[4], K[2], K[5]
     hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)
     out: Dict[str, Optional[Detection]] = {}
     for name, rng in colors.items():
-        blob, contour = largest_blob(color_mask(hsv, rng), min_area)
-        if blob is None:
-            out[name] = None
-            continue
-        m = cv2.moments(contour)
-        u, v = m['m10'] / m['m00'], m['m01'] / m['m00']
-        pt, n = deproject_blob(blob, depth_m, fx, fy, cx, cy, min_depth, max_depth, erode_px)
-        out[name] = Detection(name, (u, v), int(cv2.contourArea(contour)), pt, n,
-                              cv2.boundingRect(contour))
+        out[name] = None
+        for blob, contour in candidate_blobs(color_mask(hsv, rng), min_area):
+            size = blob_size_m(blob, depth_m, fx, fy, cx, cy, min_depth, max_depth)
+            if size is not None and not (min_size_m <= size <= max_size_m):
+                continue                                   # wrong size: zone or speck
+            m = cv2.moments(contour)
+            u, v = m['m10'] / m['m00'], m['m01'] / m['m00']
+            pt, n = deproject_blob(blob, depth_m, fx, fy, cx, cy, min_depth, max_depth, erode_px)
+            out[name] = Detection(name, (u, v), int(cv2.contourArea(contour)), pt, n,
+                                  cv2.boundingRect(contour), size)
+            break
     return out
 
 
