@@ -94,7 +94,7 @@ public:
     place_target_ = parameter<std::string>("place_target", "place");
     open_target_ = parameter<std::string>("open_target", "open");
     closed_target_ = parameter<std::string>("closed_target", "close");
-    approach_distance_ = parameter("approach_distance", 0.08);
+    approach_distance_ = parameter("approach_distance", 0.10);
     grasp_z_offset_ = parameter("grasp_z_offset", 0.0);
     cartesian_step_ = parameter("cartesian_step", 0.005);
     grasp_orientation_ = parameter("grasp_orientation_xyzw", std::vector<double>{});
@@ -318,6 +318,8 @@ private:
     } catch (const std::exception & error) {
       throw std::runtime_error(std::string("gripper already opened; ") + error.what());
     }
+    feedback<Place>(goal, stage, "closing_gripper");
+    move_to_named_target(*hand_, closed_target_);
     return "Gripper opened at the place target and the arm returned home";
   }
 
