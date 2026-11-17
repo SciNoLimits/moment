@@ -77,11 +77,22 @@ def generate_launch_description():
         output="screen",
     )
 
-    arm_controller_spawner = Node(
+    moment_arm_controller_spawner = Node(
         package="controller_manager",
         executable="spawner",
         arguments=[
-            "arm_position_controller",
+            "moment_arm_controller",
+            "--param-file",
+            controllers_file,
+        ],
+        output="screen",
+    )
+    
+    moment_gripper_controller_spawner = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=[
+            "moment_gripper_controller",
             "--param-file",
             controllers_file,
         ],
@@ -109,7 +120,8 @@ def generate_launch_description():
         robot_state_publisher,
         control_node,
         joint_state_spawner,
-        arm_controller_spawner,
+        moment_arm_controller_spawner,
+        moment_gripper_controller_spawner,
         diff_drive_spawner,
         imu_spawner,
     ])

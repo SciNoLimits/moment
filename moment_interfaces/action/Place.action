@@ -1,0 +1,6 @@
+# Empty goal.
+---
+bool success
+string message
+---
+string stage
