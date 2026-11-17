@@ -21,5 +21,5 @@ ament_target_dependencies(manipulation_server
 target_link_libraries(manipulation_server Threads::Threads)
 
 install(TARGETS manipulation_server DESTINATION lib/${PROJECT_NAME})
-install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
 ament_package()

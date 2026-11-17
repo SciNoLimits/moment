@@ -87,13 +87,13 @@ public:
   explicit ManipulationServer(const rclcpp::Node::SharedPtr & node)
   : node_(node), tf_buffer_(node->get_clock()), tf_listener_(tf_buffer_)
   {
-    const auto arm_group = parameter<std::string>("arm_group", "fer_arm");
-    const auto hand_group = parameter<std::string>("hand_group", "fer_hand");
-    const auto tcp_link = parameter<std::string>("tcp_link", "fer_hand_tcp");
+    const auto arm_group = parameter<std::string>("arm_group", "moment_arm");
+    const auto hand_group = parameter<std::string>("hand_group", "moment_gripper");
+    const auto tcp_link = parameter<std::string>("tcp_link", "end_effector_link");
     home_target_ = parameter<std::string>("home_target", "home");
     place_target_ = parameter<std::string>("place_target", "place");
     open_target_ = parameter<std::string>("open_target", "open");
-    closed_target_ = parameter<std::string>("closed_target", "closed");
+    closed_target_ = parameter<std::string>("closed_target", "close");
     approach_distance_ = parameter("approach_distance", 0.08);
     grasp_z_offset_ = parameter("grasp_z_offset", 0.0);
     cartesian_step_ = parameter("cartesian_step", 0.005);
@@ -184,6 +184,9 @@ private:
   template<typename T>
   T parameter(const std::string & name, const T & fallback)
   {
+    if (node_->has_parameter(name)) {
+      return node_->get_parameter(name).get_value<T>();
+    }
     return node_->declare_parameter<T>(name, fallback);
   }
 
@@ -261,7 +264,7 @@ private:
     moveit_msgs::msg::RobotTrajectory trajectory;
     moveit_msgs::msg::MoveItErrorCodes error;
     const double fraction = arm_->computeCartesianPath(
-      {pose.pose}, cartesian_step_, 0.0, trajectory, true, &error);
+      {pose.pose}, cartesian_step_, trajectory, true, &error);
     if (error.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS ||
       !(fraction >= 1.0) || trajectory.joint_trajectory.points.empty())
     {
@@ -337,7 +340,8 @@ private:
 int main(int argc, char ** argv)
 {
   rclcpp::init(argc, argv);
-  auto node = std::make_shared<rclcpp::Node>("manipulation_server");
+  auto options = rclcpp::NodeOptions().automatically_declare_parameters_from_overrides(true);
+  auto node = std::make_shared<rclcpp::Node>("manipulation_server", options);
   rclcpp::executors::SingleThreadedExecutor executor;
   executor.add_node(node);
   std::unique_ptr<ManipulationServer> server;
