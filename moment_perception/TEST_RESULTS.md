@@ -104,3 +104,38 @@ Same setup as Run 3. Raw data: `docs/run5_distance_sweep.csv`.
 - Red (+0.10 m sideways) is consistently the largest error (2.3–3.9 mm). Likely cause: the
   surface-to-centre push points along the viewing ray, which has a sideways component for
   off-centre cubes. To be checked with the side-angle sweep.
+
+## Run 6: side-angle sweep, 2026-11-17
+
+Green moved sideways; red +0.10 m and blue −0.10 m from it. Raw data:
+`docs/run6a_lateral_0.5m.csv`, `docs/run6b_lateral_1.0m.csv`.
+
+**At 0.5 m** (lateral of green: −0.15 … +0.15 m)
+
+| lat (m) | red (mm) | green (mm) | blue (mm) |
+|---|---|---|---|
+| −0.15 | 0.4 | 1.2 | **10.8** |
+| −0.10 | 0.3 | 1.1 | 2.0 |
+| −0.05 | 1.8 | 0.4 | 1.2 |
+| 0.00 | 2.5 | 0.7 | 1.1 |
+| +0.05 | 2.5 | 1.8 | 0.4 |
+| +0.10 | 3.0 | 2.5 | 0.3 |
+| +0.15 | **9.3** | 2.5 | 1.8 |
+
+**At 1.0 m** (lateral of green: −0.4 … +0.4 m)
+
+| lat (m) | red (mm) | green (mm) | blue (mm) |
+|---|---|---|---|
+| −0.40 | 1.2 | 1.9 | 2.8 |
+| −0.20 | 0.7 | 0.9 | 1.2 |
+| 0.00 | 2.5 | 2.5 | 0.7 |
+| +0.20 | 2.5 | 2.5 | 2.5 |
+| +0.40 | 3.1 | 2.7 | 2.5 |
+
+- 36/36 found; 34/36 within 3.1 mm.
+- Two outliers (9.3 and 10.8 mm): only the outermost cubes at 0.5 m (±0.25 m, 26.6° off-axis).
+- **Prediction rejected:** error does not simply grow with viewing angle. The outermost cubes at
+  1.0 m are at the same 26.6° and stay within 3.1 mm. The cause is specific to close range and
+  the image edge (candidates: cube near/cut by the image edge, robot parts in view, large
+  visible side face). Investigated next.
+- Both outliers are inside the ±17 mm gripper margin for a 4 cm cube.
