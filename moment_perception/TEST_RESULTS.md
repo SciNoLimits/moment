@@ -104,3 +104,55 @@ Same setup as Run 3. Raw data: `docs/run5_distance_sweep.csv`.
 - Red (+0.10 m sideways) is consistently the largest error (2.3–3.9 mm). Likely cause: the
   surface-to-centre push points along the viewing ray, which has a sideways component for
   off-centre cubes. To be checked with the side-angle sweep.
+
+## Run 6: side-angle sweep, 2026-11-17
+
+Green moved sideways; red +0.10 m and blue −0.10 m from it. Raw data:
+`docs/run6a_lateral_0.5m.csv`, `docs/run6b_lateral_1.0m.csv`.
+
+**At 0.5 m** (lateral of green: −0.15 … +0.15 m)
+
+| lat (m) | red (mm) | green (mm) | blue (mm) |
+|---|---|---|---|
+| −0.15 | 0.4 | 1.2 | **10.8** |
+| −0.10 | 0.3 | 1.1 | 2.0 |
+| −0.05 | 1.8 | 0.4 | 1.2 |
+| 0.00 | 2.5 | 0.7 | 1.1 |
+| +0.05 | 2.5 | 1.8 | 0.4 |
+| +0.10 | 3.0 | 2.5 | 0.3 |
+| +0.15 | **9.3** | 2.5 | 1.8 |
+
+**At 1.0 m** (lateral of green: −0.4 … +0.4 m)
+
+| lat (m) | red (mm) | green (mm) | blue (mm) |
+|---|---|---|---|
+| −0.40 | 1.2 | 1.9 | 2.8 |
+| −0.20 | 0.7 | 0.9 | 1.2 |
+| 0.00 | 2.5 | 2.5 | 0.7 |
+| +0.20 | 2.5 | 2.5 | 2.5 |
+| +0.40 | 3.1 | 2.7 | 2.5 |
+
+- 36/36 found; 34/36 within 3.1 mm.
+- Two outliers (9.3 and 10.8 mm): only the outermost cubes at 0.5 m (±0.25 m, 26.6° off-axis).
+- **Prediction rejected:** error does not simply grow with viewing angle. The outermost cubes at
+  1.0 m are at the same 26.6° and stay within 3.1 mm. The cause is specific to close range and
+  the image edge (candidates: cube near/cut by the image edge, robot parts in view, large
+  visible side face). Investigated next.
+- Both outliers are inside the ±17 mm gripper margin for a 4 cm cube.
+
+## Run 7: cause of the Run 6 outliers, 2026-11-17
+
+Cubes re-placed at 0.5 m, green lateral +0.15 (red at +0.25 m). Blob diagnostic:
+
+| Cube | bbox w x h (px) | sideways extent | depth extent |
+|---|---|---|---|
+| red | 47 x 59 | **1.5 cm** | 3.5 cm |
+| green | 68 x 60 | 3.8 cm | 3.3 cm |
+| blue | 55 x 59 | 3.8 cm | 2.2 cm |
+
+**Cause:** the red cube is cut off by the image border. Camera-to-cube distance is
+0.48 − 0.076 (camera offset) = 0.404 m; the image edge there is 0.404 × tan(31.3°) = 0.246 m
+sideways; the cube spans 0.23–0.27 m, so only ~1.6 cm of its front face is visible
+(measured 1.5 cm). The median of the visible part is shifted inward → 9.3 mm error.
+At 1.0 m the edge is at 0.55 m and the outermost cube (0.52 m) is fully visible → ≤3.1 mm.
+**Conclusion:** cut-off cubes give shifted positions. Viewing angle alone is not the cause.
