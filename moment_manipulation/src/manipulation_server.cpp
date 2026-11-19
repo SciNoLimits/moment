@@ -302,7 +302,11 @@ private:
     feedback<Pick>(goal, stage, "closing_gripper");
     move_to_named_target(*hand_, closed_target_);
     feedback<Pick>(goal, stage, "lifting_object");
-    move_straight(above);
+    try {
+      move_to_named_target(*arm_, home_target_);
+    } catch (const std::exception & error) {
+      throw std::runtime_error(std::string("not able to go home; ") + error.what());
+    }
     return "Gripper close and lift completed; object retention was not measured";
   }
 
