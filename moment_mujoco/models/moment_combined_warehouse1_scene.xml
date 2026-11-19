@@ -2,7 +2,7 @@
 <mujoco model="moment_combined_warehouse_scene">
   <statistic center="0 0.48 0.3" extent="9"/>
 
-  <option integrator="implicitfast" noslip_iterations="5"/>
+  <option timestep="0.001" integrator="implicitfast" cone="elliptic" impratio="10" noslip_iterations="5"/>
 
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
@@ -11,6 +11,9 @@
   </visual>
 
   <default>
+    <default class="collision">
+      <geom contype="1" conaffinity="1" condim="3"/>
+    </default>
     <default class="warehouse_wall">
       <geom type="box" rgba="0.62 0.62 0.64 1" group="1"/>
     </default>
@@ -115,27 +118,27 @@
     </body>
 
     <!-- Each 35 mm cube has its own free joint for grasping. -->
-    <body name="cube_red_01" pos="0.50 -3.615 0.050">
+    <body name="cube_red_01" pos="0.5 -3.615 0.050">
       <freejoint name="cube_red_01_joint"/>
       <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
-      <geom name="cube_red_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" rgba="0.85 0.15 0.15 1" friction="1.2 0.1 0.1" condim="3"/>
+      <geom name="cube_red_01_geom" type="box" size="0.0175 0.0175 0.0175" rgba="0.85 0.15 0.15 1" friction="3.0 0.05 0.005" condim="3" class="collision"/>
     </body>
-    <body name="cube_green_01" pos="0.50 -3.7 0.050">
+    <body name="cube_green_01" pos="0.5 -3.7 0.050">
       <freejoint name="cube_green_01_joint"/>
       <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
-      <geom name="cube_green_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" rgba="0.15 0.7 0.25 1" friction="1.2 0.1 0.1" condim="3"/>
+      <geom name="cube_green_01_geom" type="box" size="0.0175 0.0175 0.0175" rgba="0.15 0.7 0.25 1" friction="3.0 0.05 0.005" condim="3" class="collision"/>
     </body>
-    <body name="cube_blue_01" pos="0.50 -3.785 0.050">
+    <body name="cube_blue_01" pos="0.5 -3.785 0.050">
       <freejoint name="cube_blue_01_joint"/>
       <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
-      <geom name="cube_blue_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" rgba="0.15 0.3 0.85 1" friction="1.2 0.1 0.1" condim="3"/>
+      <geom name="cube_blue_01_geom" type="box" size="0.0175 0.0175 0.0175" rgba="0.15 0.3 0.85 1" friction="3.0 0.05 0.005" condim="3" class="collision"/>
     </body>
     <!-- <body name="pick_object" pos="0 0 0.1">
       <freejoint name="pick_object_free" />
       <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
       <geom name="pick_object_geom" type="box" size="0.018 0.018 0.018" rgba="0.15 0.65 0.95 1" friction="1.2 0.1 0.1" condim="3" />
     </body> -->
-    <frame pos="0.35 -3.7 0">
+    <frame pos="0.30 -3.7 0">
       <attach model="moment" body="base_footprint" prefix=""/>
     </frame>
   </worldbody>
