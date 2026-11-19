@@ -23,7 +23,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   # "msg/ObjectPose.msg"
 
   # Services
-  # "srv/DetectObject.srv"
+  "srv/DetectObject.srv"
 
   DEPENDENCIES
     geometry_msgs
