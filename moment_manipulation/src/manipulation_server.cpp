@@ -295,8 +295,8 @@ private:
 
     feedback<Pick>(goal, stage, "opening_gripper");
     move_to_named_target(*hand_, open_target_);
-    feedback<Pick>(goal, stage, "moving_to_pregrasp");
-    move_to_pose(above);
+    //feedback<Pick>(goal, stage, "moving_to_pregrasp");
+    //move_to_pose(above);
     feedback<Pick>(goal, stage, "approaching_object");
     move_straight(grasp);
     feedback<Pick>(goal, stage, "closing_gripper");
