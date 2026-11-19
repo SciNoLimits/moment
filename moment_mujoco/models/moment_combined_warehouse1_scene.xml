@@ -2,7 +2,7 @@
 <mujoco model="moment_combined_warehouse_scene">
   <statistic center="0 0.48 0.3" extent="9"/>
 
-  <option integrator="implicitfast" noslip_iterations="5"/>
+  <option timestep="0.001" integrator="implicitfast" cone="elliptic" impratio="10" noslip_iterations="5"/>
 
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
