@@ -69,13 +69,8 @@ def generate_launch_description():
         scene_arg,
         use_sim_time_arg,
         mujoco_launch,
-        TimerAction(
-            period=4.0,
-            actions=[
-                navigation_launch,
-                manipulation_launch,
-                perception_launch,
-            ]
-        )
+        TimerAction(period=4.0, actions=[navigation_launch]),
+        TimerAction(period=8.0, actions=[manipulation_launch]),
+        TimerAction(period=12.0, actions=[perception_launch]),
         
     ])

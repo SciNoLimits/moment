@@ -7,6 +7,7 @@ ros2 launch moment_manipulation manipulation.launch.py
 ros2 launch moment_perception perception.launch.py
 
 ros2 launch moment_bringup bringup.launch.py
+ros2 run moment_orchestration orchestrator
 
 ros2 launch moment_navigation moment_nav2.launch.py rviz:=True
 
@@ -150,6 +151,7 @@ ros2 action send_goal /go_to_goal \
 ros2 action send_goal /place moment_interfaces/action/Place "{}" --feedback
 
 
+ros2 service call /perception/detect_all std_srvs/srv/Trigger "{}"
 
 --------------------------------------------------------BLUE BAY OLD---------------------------------------
 

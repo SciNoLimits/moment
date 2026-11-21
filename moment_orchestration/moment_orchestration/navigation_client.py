@@ -8,7 +8,7 @@ from moment_interfaces.action import GoToGoal
 class NavigationClient:
     def __init__(self, node):
         self.node = node
-        self.action_client = ActionClient(node, GoToGoal, 'go_to_goal')
+        self.client = ActionClient(node, GoToGoal, 'go_to_goal')
 
     def navigate_to(self, x, y, yaw, callback):
 
