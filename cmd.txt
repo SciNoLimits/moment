@@ -173,3 +173,6 @@ ros2 action send_goal /place moment_interfaces/action/Place "{}" --feedback
     }
   }" \
   --feedback
+
+
+ros2 param get /controller_server general_goal_checker.xy_goal_tolerance
