@@ -238,6 +238,7 @@ class OrchestratorNode(Node):
 
         self.detect_objects()
 
+
     def identify_object(self):
 
         if not self.detected_objects:
@@ -269,8 +270,111 @@ class OrchestratorNode(Node):
         )
 
         self.set_state(MissionState.PICK_OBJECT)
+        self.pick_object()
 
 
+    def pick_object(self):
+
+        object_pose = PoseStamped()
+
+        object_pose.header.frame_id = (
+            self.detected_object['position']['frame_id'] # type: ignore
+        )
+
+        object_pose.header.stamp = self.get_clock().now().to_msg()
+
+        object_pose.pose.position.x = (
+            self.detected_object['position']['x'] # type: ignore
+        )
+
+        object_pose.pose.position.y = (
+            self.detected_object['position']['y'] # type: ignore
+        )
+
+        object_pose.pose.position.z = (
+            self.detected_object['position']['z'] # type: ignore
+            + self.get_parameter('pick_z_offset').value
+        )
+
+        object_pose.pose.orientation.x = 0.0
+        object_pose.pose.orientation.y = 0.0
+        object_pose.pose.orientation.z = 0.0
+        object_pose.pose.orientation.w = 1.0
+
+        self.get_logger().info(
+            f"Sending pick goal for {self.detected_object['color']} cube." # type: ignore
+        )
+
+        success = self.manipulation.pick(
+            object_pose,
+            self.pick_goal_callback
+        )
+
+        if not success:
+            self.get_logger().error('Failed to send pick goal.')
+            self.set_state(MissionState.ERROR)
+            
+    
+    def pick_goal_callback(self, future):
+
+        try:
+            goal_handle = future.result()
+
+        except Exception as error:
+            self.get_logger().error(
+                f'Pick goal request failed: {error}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if not goal_handle.accepted:
+            self.get_logger().error(
+                'Pick goal was rejected by the action server.'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.get_logger().info(
+            'Pick goal accepted.'
+        )
+
+        result_future = goal_handle.get_result_async()
+
+        result_future.add_done_callback(
+            self.pick_result_callback
+        )
+
+
+    def pick_result_callback(self, future):
+
+        try:
+            result = future.result()
+
+        except Exception as error:
+            self.get_logger().error(
+                f'Pick action failed: {error}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if result.status != 4:
+            self.get_logger().error(
+                f'Pick action did not succeed. Status: {result.status}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if not result.result.success:
+            self.get_logger().error(
+                f"Pick failed: {result.result.message}"
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.get_logger().info(
+            f"Pick successful: {result.result.message}"
+        )
+    
 
 def main(args=None):
     rclpy.init(args=args)
