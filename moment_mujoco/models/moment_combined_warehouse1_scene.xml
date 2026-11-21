@@ -73,7 +73,7 @@
 
     <!-- Open-top sorting bins, 28 cm square and 11 cm tall. -->
     <body name="red_bay" pos="-4.5 4.70 0">
-      <geom name="bin_red_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.85 0.15 0.15 1"/>
+      <geom name="bin_red_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.92 0.80 0.27 1"/>
       <geom name="bin_red_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.85 0.15 0.15 1"/>
       <geom name="bin_red_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.85 0.15 0.15 1"/>
       <geom name="bin_red_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.85 0.15 0.15 1"/>
@@ -81,7 +81,7 @@
       <site name="R" pos="0 0 0.015" size="0.055" rgba="1 1 1 0"/>
     </body>
     <body name="green_bay" pos="0 4.70 0">
-      <geom name="bin_green_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.15 0.7 0.25 1"/>
+      <geom name="bin_green_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.92 0.80 0.27 1"/>
       <geom name="bin_green_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.7 0.25 1"/>
       <geom name="bin_green_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.7 0.25 1"/>
       <geom name="bin_green_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.15 0.7 0.25 1"/>
@@ -89,7 +89,7 @@
       <site name="G" pos="0 0 0.015" size="0.055" rgba="1 1 1 0"/>
     </body>
     <body name="blue_bay" pos="4.5 4.70 0">
-      <geom name="bin_blue_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.15 0.3 0.85 1"/>
+      <geom name="bin_blue_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.92 0.80 0.27 1"/>
       <geom name="bin_blue_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.3 0.85 1"/>
       <geom name="bin_blue_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.3 0.85 1"/>
       <geom name="bin_blue_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.15 0.3 0.85 1"/>
