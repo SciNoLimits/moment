@@ -1,9 +1,20 @@
+"""Launch the MOMENT warehouse simulation and manipulation stack."""
 from pathlib import Path
-
-from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument, GroupAction, IncludeLaunchDescription
+from launch.conditions import IfCondition
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+from launch_ros.actions import SetParameter
+from launch_ros.substitutions import FindPackageShare
+from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 from moveit_configs_utils import MoveItConfigsBuilder
+
+def package_launch(package, filename):
+    return PythonLaunchDescriptionSource(
+        PathJoinSubstitution([FindPackageShare(package), "launch", filename])
+    )
 
 
 def generate_launch_description():
@@ -11,8 +22,21 @@ def generate_launch_description():
     moveit_config = MoveItConfigsBuilder(
         "moment", package_name="moment_moveit_config"
     ).to_moveit_configs()
-
+    
     return LaunchDescription([
+        DeclareLaunchArgument(
+            "rviz", default_value="false", description="Start MoveIt RViz.",
+        ),
+        GroupAction(actions=[
+            SetParameter(name="use_sim_time", value=True),
+            IncludeLaunchDescription(
+                package_launch("moment_moveit_config", "move_group.launch.py"),
+            ),
+            IncludeLaunchDescription(
+                package_launch("moment_moveit_config", "moveit_rviz.launch.py"),
+                condition=IfCondition(LaunchConfiguration("rviz")),
+            ),
+        ]),
         Node(
             package="moment_manipulation",
             executable="manipulation_server",
@@ -24,5 +48,5 @@ def generate_launch_description():
                 moveit_config.robot_description_kinematics,
                 moveit_config.joint_limits,
             ],
-        )
+        ),
     ])
