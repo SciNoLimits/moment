@@ -212,30 +212,40 @@ class OrchestratorNode(Node):
 
         except Exception as error:
             self.get_logger().error(
-                f'Navigation execution failed: {error}'
+                f'Navigation failed: {error}'
             )
             self.set_state(MissionState.ERROR)
             return
 
         if result.status != 4:
             self.get_logger().error(
-                f'Navigation failed. Status: {result.status}'
+                f'Navigation did not succeed. Status: {result.status}'
             )
             self.set_state(MissionState.ERROR)
             return
 
         if not result.result.success:
             self.get_logger().error(
-                'Navigation action reported failure.'
+                f'Navigation failed: {result.result.message}'
             )
             self.set_state(MissionState.ERROR)
             return
 
-        self.get_logger().info(
-            'Successfully reached home.'
-        )
+        if self.current_state == MissionState.NAVIGATE_HOME:
 
-        self.detect_objects()
+            self.get_logger().info(
+                'Successfully reached home.'
+            )
+
+            self.detect_objects()
+
+        elif self.current_state == MissionState.NAVIGATE_TO_BAY:
+
+            self.get_logger().info(
+                'Successfully reached destination bay.'
+            )
+
+            self.place_object()
 
 
     def identify_object(self):
@@ -399,7 +409,85 @@ class OrchestratorNode(Node):
                 'Failed to send navigation goal to the destination bay.'
             )
             self.set_state(MissionState.ERROR)
+            
+            
+    def place_object(self):
+
+        self.set_state(MissionState.PLACE_OBJECT)
+
+        self.get_logger().info(
+            f"Placing {self.detected_object['color']} cube at destination bay."
+        )
+
+        success = self.manipulation.place(
+            self.place_goal_callback
+        )
+
+        if not success:
+            self.get_logger().error(
+                'Failed to send place goal.'
+            )
+            self.set_state(MissionState.ERROR)
     
+    
+    def place_goal_callback(self, future):
+
+        try:
+            goal_handle = future.result()
+
+        except Exception as error:
+            self.get_logger().error(
+                f'Place goal request failed: {error}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if not goal_handle.accepted:
+            self.get_logger().error(
+                'Place goal was rejected by the action server.'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.get_logger().info(
+            'Place goal accepted.'
+        )
+
+        result_future = goal_handle.get_result_async()
+
+        result_future.add_done_callback(
+            self.place_result_callback
+        )
+        
+    def place_result_callback(self, future):
+
+        try:
+            result = future.result()
+
+        except Exception as error:
+            self.get_logger().error(
+                f'Place action failed: {error}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if result.status != 4:
+            self.get_logger().error(
+                f'Place action did not succeed. Status: {result.status}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if not result.result.success:
+            self.get_logger().error(
+                f"Place failed: {result.result.message}"
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.get_logger().info(
+            f"Place successful: {result.result.message}"
+        )
 
 def main(args=None):
     rclpy.init(args=args)
