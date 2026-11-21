@@ -4,6 +4,7 @@ colcon build --packages-select moment_mujoco moment_description moment_interface
 ros2 launch moment_mujoco moment_mujoco.launch.py scene:=moment_combined_warehouse1_scene.xml
 ros2 launch moment_navigation moment_nav2.launch.py
 ros2 launch moment_manipulation manipulation.launch.py
+ros2 launch moment_perception perception.launch.py
 
 ros2 launch moment_navigation moment_nav2.launch.py rviz:=True
 
