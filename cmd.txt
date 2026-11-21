@@ -1,0 +1,147 @@
+colcon build --packages-select moment_mujoco moment_description moment_interfaces moment_moveit_config moment_navigation moment_perception moment_manipulation
+
+
+ros2 launch moment_mujoco moment_mujoco.launch.py scene:=moment_combined_warehouse1_scene.xml
+ros2 launch moment_navigation moment_nav2.launch.py
+ros2 launch moment_manipulation manipulation.launch.py
+
+ros2 launch moment_navigation moment_nav2.launch.py rviz:=True
+
+ros2 action send_goal /pick moment_interfaces/action/Pick \
+"{object_pose: {
+  header: {frame_id: base_footprint},
+  pose: {
+    position: {x: 0.254, y: 0.0, z: 0.109}
+  }
+}}" --feedback
+
+
+ros2 action send_goal /go_to_goal \
+  moment_interfaces/action/GoToGoal \
+  "{
+    target_pose: {
+      header: {
+        frame_id: 'map'
+      },
+      pose: {
+        position: {
+          x: -1.0,
+          y: 0.0,
+          z: 0.0
+        },
+        orientation: {
+          x: 0.0,
+          y: 0.0,
+          z: 0.0,
+          w: 1.0
+        }
+      }
+    }
+  }" \
+  --feedback
+--------------------------------------------------------RED BAY ---------------------------------------
+
+  ros2 action send_goal /go_to_goal \
+  moment_interfaces/action/GoToGoal \
+  "{
+    target_pose: {
+      header: {
+        frame_id: 'map'
+      },
+      pose: {
+        position: {
+          x: -4.7,
+          y: 7.95,
+          z: 0.0
+        },
+        orientation: {
+          x: 0.0,
+          y: 0.0,
+          z: 0.707107,
+          w: 0.707107
+        }
+      }
+    }
+  }" \
+  --feedback
+
+  --------------------------------------------------------GREEN BAY ---------------------------------------
+
+  ros2 action send_goal /go_to_goal \
+  moment_interfaces/action/GoToGoal \
+  "{
+    target_pose: {
+      header: {
+        frame_id: 'map'
+      },
+      pose: {
+        position: {
+          x: -0.35,
+          y: 8.10,
+          z: 0.0
+        },
+        orientation: {
+          x: 0.0,
+          y: 0.0,
+          z: 0.707107,
+          w: 0.707107
+        }
+      }
+    }
+  }" \
+  --feedback
+
+    --------------------------------------------------------BLUE BAY ---------------------------------------
+
+  ros2 action send_goal /go_to_goal \
+  moment_interfaces/action/GoToGoal \
+  "{
+    target_pose: {
+      header: {
+        frame_id: 'map'
+      },
+      pose: {
+        position: {
+          x: 4.1,
+          y: 8.25,
+          z: 0.0
+        },
+        orientation: {
+          x: 0.0,
+          y: 0.0,
+          z: 0.707107,
+          w: 0.707107
+        }
+      }
+    }
+  }" \
+  --feedback
+
+
+     --------------------------------------------------------HOME ---------------------------------------
+
+  ros2 action send_goal /go_to_goal \
+  moment_interfaces/action/GoToGoal \
+  "{
+    target_pose: {
+      header: {
+        frame_id: 'map'
+      },
+      pose: {
+        position: {
+          x: 0.0,
+          y: 0.0,
+          z: 0.0
+        },
+        orientation: {
+          x: 0.0,
+          y: 0.0,
+          z: 0.0,
+          w: 1.0
+        }
+      }
+    }
+  }" \
+  --feedback
+
+ros2 action send_goal /place moment_interfaces/action/Place "{}" --feedback
