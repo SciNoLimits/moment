@@ -143,7 +143,6 @@ class OrchestratorNode(Node):
                 f"z={obj['position']['z']:.4f}"
             )
 
-        self.set_state(MissionState.IDENTIFY_OBJECT)
         self.identify_object()
         
         
@@ -240,6 +239,8 @@ class OrchestratorNode(Node):
 
 
     def identify_object(self):
+        
+        self.set_state(MissionState.IDENTIFY_OBJECT)
 
         if not self.detected_objects:
             self.get_logger().warning('No objects available for selection.')
@@ -269,11 +270,12 @@ class OrchestratorNode(Node):
             f"yaw={self.destination['yaw']}"
         )
 
-        self.set_state(MissionState.PICK_OBJECT)
         self.pick_object()
 
 
     def pick_object(self):
+        
+        self.set_state(MissionState.PICK_OBJECT)
 
         object_pose = PoseStamped()
 
@@ -302,7 +304,10 @@ class OrchestratorNode(Node):
         object_pose.pose.orientation.w = 1.0
 
         self.get_logger().info(
-            f"Sending pick goal for {self.detected_object['color']} cube." # type: ignore
+            f"Sending pick goal for {self.detected_object['color']} cube. at " # type: ignore
+            f"x={object_pose.pose.position.x}, "
+            f"y={object_pose.pose.position.y}, "
+            f"z={object_pose.pose.position.z}" 
         )
 
         success = self.manipulation.pick(
@@ -374,6 +379,26 @@ class OrchestratorNode(Node):
         self.get_logger().info(
             f"Pick successful: {result.result.message}"
         )
+        
+        self.navigate_to_bay()
+        
+    
+    def navigate_to_bay(self):
+
+        self.set_state(MissionState.NAVIGATE_TO_BAY)
+
+        success = self.navigation.navigate_to(
+            self.destination['x'],
+            self.destination['y'],
+            self.destination['yaw'],
+            self.navigation_goal_callback
+        )
+
+        if not success:
+            self.get_logger().error(
+                'Failed to send navigation goal to the destination bay.'
+            )
+            self.set_state(MissionState.ERROR)
     
 
 def main(args=None):
