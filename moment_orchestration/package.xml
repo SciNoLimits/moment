@@ -3,8 +3,10 @@
 <package format="3">
   <name>moment_orchestration</name>
   <version>0.0.0</version>
-  <description>High-level task orchestration for the MOMENT autonomous mobile manipulation system</description>
-  <maintainer email="prajwal.dutta@stud.th-deg.de">scinolimits</maintainer>
+  <description>Mission orchestration for the MOMENT autonomous mobile manipulation system</description>
+  <maintainer email="prajwal.dutta@stud.th-deg.de">SciNoLimits</maintainer>
+  <maintainer email="sai.balaji@stud.th-deg.de">Sai</maintainer>
+  <maintainer email="charan.kalyana-kumar@stud.th-deg.de">Charan</maintainer>
   <license>Apache-2.0</license>
 
   <depend>rclpy</depend>
