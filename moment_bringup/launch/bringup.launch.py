@@ -2,7 +2,7 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, TimerAction
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 
@@ -69,7 +69,13 @@ def generate_launch_description():
         scene_arg,
         use_sim_time_arg,
         mujoco_launch,
-        navigation_launch,
-        manipulation_launch,
-        perception_launch,
+        TimerAction(
+            period=4.0,
+            actions=[
+                navigation_launch,
+                manipulation_launch,
+                perception_launch,
+            ]
+        )
+        
     ])
