@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+from geometry_msgs.msg import PoseStamped
 from rclpy.executors import ExternalShutdownException
 from enum import Enum, auto
 from moment_orchestration.perception_client import PerceptionClient
@@ -47,6 +48,8 @@ class OrchestratorNode(Node):
 
                 ('global_frame', 'map'),
                 ('robot_frame', 'base_footprint'),
+                
+                ('pick_z_offset', 0.089),
             ]
         )
 
