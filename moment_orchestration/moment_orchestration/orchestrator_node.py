@@ -234,6 +234,39 @@ class OrchestratorNode(Node):
 
         self.detect_objects()
 
+    def identify_object(self):
+
+        if not self.detected_objects:
+            self.get_logger().warning('No objects available for selection.')
+            self.set_state(MissionState.ERROR)
+            return
+
+        # Select the first detected object
+        self.detected_object = self.detected_objects[0]
+
+        color = self.detected_object['color']
+
+        self.get_logger().info(
+            f"Selected {color} cube for pickup."
+        )
+
+        self.select_destination(color)
+        
+        
+    def select_destination(self, color):
+
+        self.destination = self.get_waypoint(f'{color}_bay')
+
+        self.get_logger().info(
+            f"Destination selected for {color} cube: "
+            f"x={self.destination['x']}, "
+            f"y={self.destination['y']}, "
+            f"yaw={self.destination['yaw']}"
+        )
+
+        self.set_state(MissionState.PICK_OBJECT)
+
+
 
 def main(args=None):
     rclpy.init(args=args)
