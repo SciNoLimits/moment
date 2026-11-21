@@ -33,18 +33,11 @@ using PoseStamped = geometry_msgs::msg::PoseStamped;
 template<typename Action>
 using GoalHandle = rclcpp_action::ServerGoalHandle<Action>;
 
-bool valid_orientation(const geometry_msgs::msg::Quaternion & q)
-{
-  const double norm = std::hypot(std::hypot(q.x, q.y), std::hypot(q.z, q.w));
-  return std::isfinite(norm) && std::abs(norm - 1.0) < 1e-3;
-}
-
-bool valid_pose(const PoseStamped & pose)
+bool valid_position(const PoseStamped & pose)
 {
   const auto & p = pose.pose.position;
   return !pose.header.frame_id.empty() &&
-         std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z) &&
-         valid_orientation(pose.pose.orientation);
+         std::isfinite(p.x) && std::isfinite(p.y) && std::isfinite(p.z);
 }
 
 void require_target(MoveGroup & group, const std::string & target)
@@ -94,41 +87,33 @@ public:
     place_target_ = parameter<std::string>("place_target", "place");
     open_target_ = parameter<std::string>("open_target", "open");
     closed_target_ = parameter<std::string>("closed_target", "close");
-    approach_distance_ = parameter("approach_distance", 0.10);
+    approach_distance_ = parameter("approach_distance", 0.03);
+    use_pregrasp_ = parameter("use_pregrasp", false);
+    planning_time_ = parameter("planning_time", 5.0);
+    position_tolerance_ = parameter("position_tolerance", 0.002);
     grasp_z_offset_ = parameter("grasp_z_offset", 0.0);
-    cartesian_step_ = parameter("cartesian_step", 0.005);
-    grasp_orientation_ = parameter("grasp_orientation_xyzw", std::vector<double>{});
     const auto velocity = parameter("velocity_scaling", 0.15);
     const auto acceleration = parameter("acceleration_scaling", 0.15);
 
     if (arm_group == hand_group || home_target_ == place_target_ ||
       open_target_ == closed_target_ || !std::isfinite(grasp_z_offset_) ||
       !std::isfinite(approach_distance_) || approach_distance_ <= 0.0 ||
-      !std::isfinite(cartesian_step_) || cartesian_step_ <= 0.0 ||
+      !std::isfinite(planning_time_) || planning_time_ <= 0.0 ||
+      !std::isfinite(position_tolerance_) || position_tolerance_ <= 0.0 ||
       !(velocity > 0.0 && velocity <= 1.0) ||
       !(acceleration > 0.0 && acceleration <= 1.0))
     {
       throw std::runtime_error("Invalid planning groups, target names, motion distances, or scaling");
     }
-    if (!grasp_orientation_.empty()) {
-      if (grasp_orientation_.size() != 4) {
-        throw std::runtime_error("grasp_orientation_xyzw must contain four values");
-      }
-      fixed_orientation_.x = grasp_orientation_[0];
-      fixed_orientation_.y = grasp_orientation_[1];
-      fixed_orientation_.z = grasp_orientation_[2];
-      fixed_orientation_.w = grasp_orientation_[3];
-      if (!valid_orientation(fixed_orientation_)) {
-        throw std::runtime_error("grasp_orientation_xyzw must be a unit quaternion");
-      }
-    }
-
     arm_ = std::make_unique<MoveGroup>(node_, arm_group, nullptr, rclcpp::Duration::from_seconds(10));
     hand_ = std::make_unique<MoveGroup>(node_, hand_group, nullptr, rclcpp::Duration::from_seconds(10));
     if (!arm_->setEndEffectorLink(tcp_link)) {
       throw std::runtime_error("Could not select TCP link '" + tcp_link + "'");
     }
     arm_->setPoseReferenceFrame(arm_->getPlanningFrame());
+    arm_->setPlanningPipelineId("ompl");
+    arm_->setPlanningTime(planning_time_);
+    arm_->setGoalPositionTolerance(position_tolerance_);
     for (auto * group : {arm_.get(), hand_.get()}) {
       group->setMaxVelocityScalingFactor(velocity);
       group->setMaxAccelerationScalingFactor(acceleration);
@@ -151,8 +136,8 @@ public:
     pick_server_ = rclcpp_action::create_server<Pick>(
       node_, "pick",
       [this](const rclcpp_action::GoalUUID &, std::shared_ptr<const Pick::Goal> goal) {
-        if (!valid_pose(goal->object_pose)) {
-          RCLCPP_WARN(node_->get_logger(), "Pick requires a frame and a finite pose with a unit quaternion");
+        if (!valid_position(goal->object_pose)) {
+          RCLCPP_WARN(node_->get_logger(), "Pick requires a nonempty frame and finite XYZ; orientation is ignored");
           return rclcpp_action::GoalResponse::REJECT;
         }
         return reserve_goal();
@@ -176,7 +161,7 @@ public:
         });
       });
 
-    RCLCPP_INFO(node_->get_logger(), "Pick and place servers ready; planning frame: %s",
+    RCLCPP_INFO(node_->get_logger(), "Position-only pick and place servers ready; planning frame: %s",
       arm_->getPlanningFrame().c_str());
   }
 
@@ -249,65 +234,87 @@ private:
     goal->publish_feedback(update);
   }
 
-  void move_to_pose(const PoseStamped & pose)
+  // Every arm XYZ motion uses OMPL with a position-only goal. No Cartesian
+  // path interpolation, fixed quaternion, manual IK, or angle sampling.
+  void move_to_pose(const PoseStamped & input)
   {
+    if (!valid_position(input)) {
+      throw std::runtime_error("Invalid position target");
+    }
+    auto target = input;
+    // PoseStamped remains the wire format; use a valid placeholder for TF only.
+    target.pose.orientation = geometry_msgs::msg::Quaternion();
+    target.pose.orientation.w = 1.0;
+    const auto frame = arm_->getPlanningFrame();
+    if (target.header.frame_id != frame) {
+      target = tf_buffer_.transform(target, frame, tf2::durationFromSec(0.5));
+    }
+    arm_->clearPoseTargets();
+    arm_->clearPathConstraints();
+    arm_->clearTrajectoryConstraints();
+    arm_->setPoseReferenceFrame(frame);
     arm_->setStartStateToCurrentState();
-    if (!arm_->setPoseTarget(pose)) {
-      throw std::runtime_error("could not select the TCP pose target");
+    const auto & p = target.pose.position;
+    RCLCPP_INFO(node_->get_logger(),
+      "POSITION-ONLY target input_frame=%s planning_frame=%s tcp=%s "
+      "xyz=[%.6f %.6f %.6f]; orientation unconstrained",
+      input.header.frame_id.c_str(), frame.c_str(),
+      arm_->getEndEffectorLink().c_str(), p.x, p.y, p.z);
+    if (!arm_->setPositionTarget(p.x, p.y, p.z, arm_->getEndEffectorLink())) {
+      throw std::runtime_error("Could not set position-only TCP target");
     }
-    plan_and_execute(*arm_);
-  }
-
-  void move_straight(const PoseStamped & pose)
-  {
-    arm_->setStartStateToCurrentState();
-    moveit_msgs::msg::RobotTrajectory trajectory;
-    moveit_msgs::msg::MoveItErrorCodes error;
-    const double fraction = arm_->computeCartesianPath(
-      {pose.pose}, cartesian_step_, trajectory, true, &error);
-    if (error.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS ||
-      !(fraction >= 1.0) || trajectory.joint_trajectory.points.empty())
-    {
-      throw std::runtime_error("Cartesian path incomplete (fraction " + std::to_string(fraction) +
-        ", MoveIt code " + std::to_string(error.val) + ")");
+    try {
+      plan_and_execute(*arm_);
+    } catch (...) {
+      arm_->clearPoseTargets();
+      throw;
     }
-    const auto executed = arm_->execute(trajectory);
-    if (executed.val != moveit_msgs::msg::MoveItErrorCodes::SUCCESS) {
-      throw std::runtime_error(
-        "Cartesian execution failed (MoveIt code " + std::to_string(executed.val) + ")");
-    }
+    arm_->clearPoseTargets();
+    const auto actual = arm_->getCurrentPose();
+    RCLCPP_INFO(node_->get_logger(),
+      "Reached TCP frame=%s xyz=[%.6f %.6f %.6f] "
+      "chosen quaternion xyzw=[%.6f %.6f %.6f %.6f]",
+      actual.header.frame_id.c_str(), actual.pose.position.x,
+      actual.pose.position.y, actual.pose.position.z,
+      actual.pose.orientation.x, actual.pose.orientation.y,
+      actual.pose.orientation.z, actual.pose.orientation.w);
   }
 
   std::string pick(const std::shared_ptr<GoalHandle<Pick>> & goal, std::string & stage)
   {
-    feedback<Pick>(goal, stage, "transforming_object_pose");
+    feedback<Pick>(goal, stage, "transforming_object_position");
     auto grasp = goal->get_goal()->object_pose;
+    grasp.pose.orientation = geometry_msgs::msg::Quaternion();
+    grasp.pose.orientation.w = 1.0;
     const auto frame = arm_->getPlanningFrame();
     if (grasp.header.frame_id != frame) {
       grasp = tf_buffer_.transform(grasp, frame, tf2::durationFromSec(0.5));
     }
+    // Offset is expressed along planning-frame Z, in metres.
     grasp.pose.position.z += grasp_z_offset_;
-    if (!grasp_orientation_.empty()) {
-      grasp.pose.orientation = fixed_orientation_;
-    }
-    auto above = grasp;
-    above.pose.position.z += approach_distance_;
+    RCLCPP_INFO(node_->get_logger(),
+      "Pick position-only mode: grasp_z_offset=%.4f use_pregrasp=%s",
+      grasp_z_offset_, use_pregrasp_ ? "true" : "false");
 
     feedback<Pick>(goal, stage, "opening_gripper");
     move_to_named_target(*hand_, open_target_);
-    //feedback<Pick>(goal, stage, "moving_to_pregrasp");
-    //move_to_pose(above);
+    if (use_pregrasp_) {
+      auto above = grasp;
+      above.pose.position.z += approach_distance_;
+      feedback<Pick>(goal, stage, "moving_to_pregrasp");
+      move_to_pose(above);
+    }
     feedback<Pick>(goal, stage, "approaching_object");
-    move_straight(grasp);
+    move_to_pose(grasp);
     feedback<Pick>(goal, stage, "closing_gripper");
     move_to_named_target(*hand_, closed_target_);
-    feedback<Pick>(goal, stage, "lifting_object");
+    feedback<Pick>(goal, stage, "returning_home");
     try {
       move_to_named_target(*arm_, home_target_);
     } catch (const std::exception & error) {
       throw std::runtime_error(std::string("not able to go home; ") + error.what());
     }
-    return "Gripper close and lift completed; object retention was not measured";
+    return "Position-only pick motion completed; grasp orientation and object retention were not verified";
   }
 
   std::string place(const std::shared_ptr<GoalHandle<Place>> & goal, std::string & stage)
@@ -333,9 +340,8 @@ private:
   std::unique_ptr<MoveGroup> arm_;
   std::unique_ptr<MoveGroup> hand_;
   std::string home_target_, place_target_, open_target_, closed_target_;
-  double approach_distance_, grasp_z_offset_, cartesian_step_;
-  std::vector<double> grasp_orientation_;
-  geometry_msgs::msg::Quaternion fixed_orientation_;
+  bool use_pregrasp_;
+  double approach_distance_, grasp_z_offset_, planning_time_, position_tolerance_;
   rclcpp_action::Server<Pick>::SharedPtr pick_server_;
   rclcpp_action::Server<Place>::SharedPtr place_server_;
   std::atomic<bool> busy_{false};
