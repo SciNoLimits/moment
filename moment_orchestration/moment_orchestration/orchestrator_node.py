@@ -141,6 +141,7 @@ class OrchestratorNode(Node):
             )
 
         self.set_state(MissionState.IDENTIFY_OBJECT)
+        self.identify_object()
         
         
     def start_mission(self):
