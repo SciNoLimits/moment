@@ -1,4 +1,4 @@
-colcon build --packages-select moment_mujoco moment_description moment_interfaces moment_moveit_config moment_navigation moment_perception moment_manipulation
+colcon build --packages-select moment_orchestration moment_bringup moment_mujoco moment_description moment_interfaces moment_moveit_config moment_navigation moment_perception moment_manipulation
 
 
 ros2 launch moment_mujoco moment_mujoco.launch.py scene:=moment_combined_warehouse1_scene.xml
