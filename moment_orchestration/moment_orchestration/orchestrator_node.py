@@ -490,6 +490,7 @@ class OrchestratorNode(Node):
             f"Place successful: {result.result.message}"
         )
 
+
 def main(args=None):
     rclpy.init(args=args)
 
