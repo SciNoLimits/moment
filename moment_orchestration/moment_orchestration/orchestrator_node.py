@@ -3,6 +3,8 @@ from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 from enum import Enum, auto
 from moment_orchestration.perception_client import PerceptionClient
+from moment_orchestration.navigation_client import NavigationClient
+from moment_orchestration.manipulation_client import ManipulationClient
 
 
 class MissionState(Enum):
@@ -23,7 +25,7 @@ class OrchestratorNode(Node):
     def __init__(self, name: str):
         super().__init__(node_name=name)
         
-        # Declare mission parameters
+        # Declaring mission parameters
         self.declare_parameters(
             namespace='',
             parameters=[ # type: ignore[arg-type]
@@ -47,9 +49,6 @@ class OrchestratorNode(Node):
                 ('robot_frame', 'base_footprint'),
             ]
         )
-        
-        self.perception = PerceptionClient(self)
-        self.detected_objects = []
 
         # Mission state
         self.current_state = MissionState.IDLE
@@ -59,6 +58,18 @@ class OrchestratorNode(Node):
 
         # Mission status
         self.mission_active = False
+        
+        # Detected objects
+        self.detected_objects = []
+        
+        # Initializing clients
+        self.perception = PerceptionClient(self)
+        self.navigation = NavigationClient(self)
+        self.manipulation = ManipulationClient(self)
+        
+        self.get_logger().info('Perception client initialized.')
+        self.get_logger().info('Navigation client initialized.')
+        self.get_logger().info('Manipulation client initialized.')
 
         self.get_logger().info('MOMENT Orchestrator initialized.')
         
