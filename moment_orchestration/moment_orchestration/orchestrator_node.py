@@ -73,6 +73,11 @@ class OrchestratorNode(Node):
 
         self.get_logger().info('MOMENT Orchestrator initialized.')
         
+        self.start_timer = self.create_timer(
+            2.0,
+            self.start_mission
+        )
+        
         
     def get_waypoint(self, name):
         return {
@@ -136,6 +141,98 @@ class OrchestratorNode(Node):
             )
 
         self.set_state(MissionState.IDENTIFY_OBJECT)
+        
+        
+    def start_mission(self):
+
+        # Execute only once
+        self.start_timer.cancel()
+
+        self.get_logger().info('Starting MOMENT mission...')
+
+        self.mission_active = True
+
+        self.navigate_home()
+        
+        
+    def navigate_home(self):
+
+        self.set_state(MissionState.NAVIGATE_HOME)
+
+        home = self.get_waypoint('home')
+
+        success = self.navigation.navigate_to(
+            home['x'],
+            home['y'],
+            home['yaw'],
+            self.navigation_goal_callback
+        )
+
+        if not success:
+            self.set_state(MissionState.ERROR)
+            
+            
+    def navigation_goal_callback(self, future):
+
+        try:
+            goal_handle = future.result()
+
+        except Exception as error:
+            self.get_logger().error(
+                f'Navigation goal request failed: {error}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if not goal_handle.accepted:
+            self.get_logger().error(
+                'Navigation goal rejected.'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.get_logger().info(
+            'Navigation goal accepted.'
+        )
+
+        result_future = goal_handle.get_result_async()
+
+        result_future.add_done_callback(
+            self.navigation_result_callback
+        )
+        
+        
+    def navigation_result_callback(self, future):
+
+        try:
+            result = future.result()
+
+        except Exception as error:
+            self.get_logger().error(
+                f'Navigation execution failed: {error}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if result.status != 4:
+            self.get_logger().error(
+                f'Navigation failed. Status: {result.status}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        if not result.result.success:
+            self.get_logger().error(
+                'Navigation action reported failure.'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.get_logger().info(
+            'Successfully reached home.'
+        )
+
+        self.detect_objects()
 
 
 def main(args=None):
