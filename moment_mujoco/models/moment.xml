@@ -75,7 +75,7 @@
               <body name="gripper_left_link" pos="0.0817 0.021 0">
                 <inertial pos="0 0 0" mass="0.001" diaginertia="1e-06 1e-06 1e-06"/>
                 <joint name="gripper_left_joint" pos="0 0 0" axis="0 1 0" type="slide" range="-0.01 0.019" actuatorfrcrange="-10 10" damping="0.1" armature="0.01"/>
-                <geom name="left_grip_pad" type="box" pos="0.0416 0 0" size="0.0233 0.003 0.015" class="collision" friction="7.0 0.05 0.005" rgba="0.85 0.15 0.15 1" solref="0.004 1" solimp="0.95 0.99 0.001"/>
+                <geom name="left_grip_pad" type="box" pos="0.0416 0 0" size="0.0233 0.003 0.015" class="collision" friction="7.0 1.5 1.5" rgba="0.85 0.15 0.15 1" solref="0.004 1" solimp="0.95 0.99 0.001"/>
                 <geom type="mesh" mesh="gripper_left_palm" class="visual"/>
                 <geom type="mesh" mesh="gripper_left_palm" class="collision"/>
                 <site name="gripper_left_link" pos="0 0 0" quat="1.0 0 0 0"/>
@@ -83,7 +83,7 @@
               <body name="gripper_right_link" pos="0.0817 -0.021 0">
                 <inertial pos="0 0 0" mass="0.001" diaginertia="1e-06 1e-06 1e-06"/>
                 <joint name="gripper_right_joint" pos="0 0 0" axis="0 -1 0" type="slide" range="-0.01 0.019" actuatorfrcrange="-10 10" damping="0.1" armature="0.01"/>
-                <geom name="right_grip_pad" type="box" pos="0.0416 0 0" size="0.0233 0.003 0.015" class="collision" friction="7.0 0.05 0.005" rgba="0.85 0.15 0.15 1" solref="0.004 1" solimp="0.95 0.99 0.001"/>
+                <geom name="right_grip_pad" type="box" pos="0.0416 0 0" size="0.0233 0.003 0.015" class="collision" friction="7.0 1.5 1.5" rgba="0.85 0.15 0.15 1" solref="0.004 1" solimp="0.95 0.99 0.001"/>
                 <geom type="mesh" mesh="gripper_right_palm" class="visual"/>
                 <geom type="mesh" mesh="gripper_right_palm" class="collision"/>
                 <site name="gripper_right_link" pos="0 0 0" quat="1.0 0 0 0"/>
