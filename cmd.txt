@@ -65,7 +65,7 @@ ros2 action send_goal /go_to_goal \
   }" \
   --feedback
 
-  --------------------------------------------------------GREEN BAY ---------------------------------------
+--------------------------------------------------------GREEN BAY ---------------------------------------
 
   ros2 action send_goal /go_to_goal \
   moment_interfaces/action/GoToGoal \
@@ -91,7 +91,7 @@ ros2 action send_goal /go_to_goal \
   }" \
   --feedback
 
-    --------------------------------------------------------BLUE BAY ---------------------------------------
+--------------------------------------------------------BLUE BAY ---------------------------------------
 
   ros2 action send_goal /go_to_goal \
   moment_interfaces/action/GoToGoal \
@@ -102,8 +102,8 @@ ros2 action send_goal /go_to_goal \
       },
       pose: {
         position: {
-          x: 3.9,
-          y: 8.5,
+          x: 3.7,
+          y: 8.6,
           z: 0.0
         },
         orientation: {
@@ -118,7 +118,7 @@ ros2 action send_goal /go_to_goal \
   --feedback
 
 
-     --------------------------------------------------------HOME ---------------------------------------
+--------------------------------------------------------HOME ---------------------------------------
 
   ros2 action send_goal /go_to_goal \
   moment_interfaces/action/GoToGoal \
@@ -148,7 +148,7 @@ ros2 action send_goal /place moment_interfaces/action/Place "{}" --feedback
 
 
 
-    --------------------------------------------------------BLUE BAY OLD---------------------------------------
+--------------------------------------------------------BLUE BAY OLD---------------------------------------
 
   ros2 action send_goal /go_to_goal \
   moment_interfaces/action/GoToGoal \
