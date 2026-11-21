@@ -416,7 +416,7 @@ class OrchestratorNode(Node):
         self.set_state(MissionState.PLACE_OBJECT)
 
         self.get_logger().info(
-            f"Placing {self.detected_object['color']} cube at destination bay."
+            f"Placing {self.detected_object['color']} cube at destination bay." # type: ignore
         )
 
         success = self.manipulation.place(
@@ -458,6 +458,7 @@ class OrchestratorNode(Node):
         result_future.add_done_callback(
             self.place_result_callback
         )
+       
         
     def place_result_callback(self, future):
 
