@@ -2,6 +2,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.executors import ExternalShutdownException
 from enum import Enum, auto
+from moment_orchestration.perception_client import PerceptionClient
 
 
 class MissionState(Enum):
@@ -21,7 +22,7 @@ class OrchestratorNode(Node):
 
     def __init__(self, name: str):
         super().__init__(node_name=name)
-
+        
         # Declare mission parameters
         self.declare_parameters(
             namespace='',
@@ -46,6 +47,9 @@ class OrchestratorNode(Node):
                 ('robot_frame', 'base_footprint'),
             ]
         )
+        
+        self.perception = PerceptionClient(self)
+        self.detected_objects = []
 
         # Mission state
         self.current_state = MissionState.IDLE
@@ -73,6 +77,54 @@ class OrchestratorNode(Node):
         self.get_logger().info(
             f'Mission state changed to: {self.current_state.name}'
         )
+        
+        
+    def detect_objects(self):
+
+        self.set_state(MissionState.DETECT_OBJECTS)
+
+        success = self.perception.detect_objects(
+            self.detection_callback
+        )
+
+        if not success:
+            self.set_state(MissionState.ERROR)
+            
+    
+    def detection_callback(self, future):
+
+        try:
+            response = future.result()
+
+        except Exception as error:
+            self.get_logger().error(
+                f'Perception service failed: {error}'
+            )
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.detected_objects = self.perception.parse_response(response)
+
+        if not self.detected_objects:
+            self.get_logger().info(
+                'No cubes detected. Mission complete.'
+            )
+            self.set_state(MissionState.MISSION_COMPLETE)
+            return
+
+        self.get_logger().info(
+            f'Detected {len(self.detected_objects)} cube(s).'
+        )
+
+        for obj in self.detected_objects:
+            self.get_logger().info(
+                f"{obj['color']} cube detected at "
+                f"x={obj['position']['x']:.4f}, "
+                f"y={obj['position']['y']:.4f}, "
+                f"z={obj['position']['z']:.4f}"
+            )
+
+        self.set_state(MissionState.IDENTIFY_OBJECT)
 
 
 def main(args=None):
