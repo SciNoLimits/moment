@@ -1,3 +1,5 @@
+import os
+from glob import glob
 from setuptools import find_packages, setup
 
 package_name = 'moment_orchestration'
@@ -10,12 +12,20 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (
+            os.path.join('share', package_name, 'config'),
+            glob('config/*.yaml')
+        ),
+        (
+            os.path.join('share', package_name, 'launch'),
+            glob('launch/*.launch.py')
+        ),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='scinolimits',
     maintainer_email='prajwal.dutta@stud.th-deg.de',
-    description='High-level task orchestration for the MOMENT autonomous mobile manipulation system',
+    description='Mission orchestration for the MOMENT autonomous mobile manipulation system',
     license='Apache-2.0',
     extras_require={
         'test': [
@@ -24,6 +34,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'orchestrator = moment_orchestration.orchestrator_node:main',
         ],
     },
 )
