@@ -169,7 +169,6 @@ class OrchestratorNode(Node):
                 f'{self.detected_object["position"]}'
             )
 
-            self.set_state(MissionState.PICK_OBJECT)
             self.pick_object()
             return
 
