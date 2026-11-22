@@ -21,7 +21,7 @@ orchestrator_node:
 
     # Blue cube destination
     blue_bay:
-      x: 3.7
+      x: 3.75
       y: 8.6
       yaw: 0.0
 
