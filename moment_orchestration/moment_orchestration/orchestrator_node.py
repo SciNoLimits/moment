@@ -1,5 +1,3 @@
-from turtle import delay
-
 import rclpy
 import math
 from rclpy.node import Node
@@ -97,6 +95,8 @@ class OrchestratorNode(Node):
         
         self.target_color = None
         self.approach_pending = False
+        self.approach_pending = False
+        self.detection_timer = None
         
         self.start_timer = self.create_timer(
             2.0,
@@ -290,21 +290,13 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully reached home.'
             )
-            self.create_timer(
-                object_detector_delay, # type: ignore
-                self.detect_objects,
-                callback_group=self.default_callback_group
-            )
+            self.schedule_detection()
             
         elif self.current_state == MissionState.APPROACH_OBJECT:
             self.get_logger().info(
                 'Approach completed. Detecting objects again...'
             )
-            self.create_timer(
-                object_detector_delay, # type: ignore
-                self.detect_objects,
-                callback_group=self.default_callback_group
-            )
+            self.schedule_detection()
 
         elif self.current_state == MissionState.NAVIGATE_TO_BAY:
 
@@ -318,11 +310,7 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully returned home.'
             )
-            self.create_timer(
-                object_detector_delay, # type: ignore
-                self.detect_objects,
-                callback_group=self.default_callback_group
-            )
+            self.schedule_detection()
 
 
     def identify_object(self):
@@ -701,6 +689,32 @@ class OrchestratorNode(Node):
         if not goal_sent:
             self.approach_pending = False
             self.set_state(MissionState.ERROR)
+
+
+    def schedule_detection(self):
+
+        delay = self.get_parameter(
+            'object_detector_delay'
+        ).value
+
+        self.get_logger().info(
+            f'Waiting {delay:.1f} seconds before object detection...'
+        )
+
+        self.detection_timer = self.create_timer(
+            delay, # type: ignore
+            self.delayed_detection,
+            callback_group=self.default_callback_group
+        )
+
+
+    def delayed_detection(self):
+
+        # Cancel the timer to prevent repeated execution
+        self.detection_timer.cancel() # type: ignore
+        self.detection_timer = None
+
+        self.detect_objects()
 
 
 def main(args=None):
