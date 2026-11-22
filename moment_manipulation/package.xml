@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>moment_manipulation</name>
+  <version>0.0.1</version>
+  <description>MoveIt action servers for picking and placing in the Moment warehouse.</description>
+  <maintainer email="maintainer@example.com">Moment Project Maintainer</maintainer>
+  <license>TODO: Specify project license</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>geometry_msgs</depend>
+  <depend>moment_interfaces</depend>
+  <depend>moveit_msgs</depend>
+  <depend>moveit_ros_planning_interface</depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_action</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>tf2_ros</depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>moment_moveit_config</exec_depend>
+  <exec_depend>moveit_configs_utils</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
