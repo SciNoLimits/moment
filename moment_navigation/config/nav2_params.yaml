@@ -24,7 +24,7 @@ amcl:
     laser_min_range: -1.0
     laser_model_type: "likelihood_field"
     max_beams: 60
-    max_particles: 2000
+    max_particles: 2000F
     min_particles: 500
     odom_frame_id: "odom"
     pf_err: 0.05
@@ -380,7 +380,7 @@ velocity_smoother:
     use_sim_time: True
     enable_stamped_cmd_vel: true
     smoothing_frequency: 20.0
-    stamp_smoothed_velocity_with_smoothing_time: False
+    stamp_smoothed_velocity_with_smoothing_time: True
     scale_velocities: False
     feedback: "OPEN_LOOP"
     max_velocity: [0.5, 0.0, 2.0]
