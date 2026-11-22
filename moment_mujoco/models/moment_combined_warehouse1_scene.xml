@@ -108,13 +108,13 @@
     <!-- Pickup tray centred 0.50 m along +X from the robot spawn.
          The tray is fixed. Its inner surface is at z = 0.032 m. -->
     <body name="pickup_tray" pos="0.50 -3.7 0" childclass="pickup_tray">
-      <geom name="pickup_tray_foot_left" pos="0 0.10 0.025" size="0.075 0.015 0.05"/>
-      <geom name="pickup_tray_foot_right" pos="0 -0.10 0.025" size="0.075 0.015 0.05"/>
-      <geom name="pickup_tray_base" pos="0 0 0.072" size="0.105 0.155 0.005"/>
-      <!-- <geom name="pickup_tray_rim_front" pos="0.100 0 0.081" size="0.005 0.155 0.004"/>
-      <geom name="pickup_tray_rim_back" pos="-0.100 0 0.081" size="0.005 0.155 0.004"/>
-      <geom name="pickup_tray_rim_left" pos="0 0.150 0.081" size="0.095 0.005 0.004"/>
-      <geom name="pickup_tray_rim_right" pos="0 -0.150 0.081" size="0.095 0.005 0.004"/> -->
+      <geom name="pickup_tray_foot_left" pos="0 0.04 0.025" size="0.075 0.015 0.05"/>
+      <geom name="pickup_tray_foot_right" pos="0 -0.04 0.025" size="0.075 0.015 0.05"/>
+      <geom name="pickup_tray_base" pos="0 0 0.072" size="0.085 0.055 0.005"/>
+      <!-- <geom name="pickup_tray_rim_front" pos="0.100 0 0.086" size="0.005 0.205 0.03"/> -->
+      <!-- <geom name="pickup_tray_rim_left" pos="0 0.200 0.086" size="0.102 0.005 0.08"/> -->
+      <!-- <geom name="pickup_tray_rim_right" pos="0 -0.200 0.086" size="0.102 0.005 0.08"/>  -->
+      <!-- <geom name="pickup_tray_rim_back" pos="-0.100 0 0.081" size="0.005 0.155 0.004"/> -->
     </body>
 
     <!-- Each 35 mm cube has its own free joint for grasping. -->
@@ -138,7 +138,7 @@
       <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
       <geom name="pick_object_geom" type="box" size="0.018 0.018 0.018" rgba="0.15 0.65 0.95 1" friction="1.2 0.1 0.1" condim="3" />
     </body> -->
-    <frame pos="0.20 -3.7 0">
+    <frame pos="0 -3.7 0">
       <attach model="moment" body="base_footprint" prefix=""/>
     </frame>
   </worldbody>

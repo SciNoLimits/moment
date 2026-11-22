@@ -140,6 +140,11 @@ class ColorDetectorNode(Node):
             res.success, res.message = False, 'no camera data yet (check topics / bridge)'
             return res
         age = (self.get_clock().now() - Time.from_msg(self.latest[0].header.stamp)).nanoseconds * 1e-9
+        self.get_logger().info(
+            f'Perception image age: {age:.3f}s, '
+            f'image stamp: {self.latest[0].header.stamp.sec}.'
+            f'{self.latest[0].header.stamp.nanosec}'
+        )
         if age > self.max_age:
             res.success, res.message = False, f'camera frame is {age:.2f} s old (max {self.max_age})'
             return res
@@ -176,6 +181,11 @@ class ColorDetectorNode(Node):
             ps = PointStamped()
             ps.header = rgb_msg.header
             ps.point.x, ps.point.y, ps.point.z = map(float, pt)
+            self.get_logger().info(
+                f'Processing image from frame: {rgb_msg.header.frame_id}, '
+                f'stamp: {rgb_msg.header.stamp.sec}.'
+                f'{rgb_msg.header.stamp.nanosec}'
+            )
             try:
                 tf = self.tf_buffer.lookup_transform(self.target_frame, rgb_msg.header.frame_id,
                                                      Time.from_msg(rgb_msg.header.stamp),
