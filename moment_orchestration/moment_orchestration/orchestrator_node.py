@@ -42,7 +42,7 @@ class OrchestratorNode(Node):
                 ('green_bay.y', 8.10),
                 ('green_bay.yaw', 1.57079632679),
 
-                ('blue_bay.x', 3.75),
+                ('blue_bay.x', 3.72),
                 ('blue_bay.y', 8.6),
                 ('blue_bay.yaw', 0.0),
 
