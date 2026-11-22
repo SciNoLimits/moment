@@ -1,4 +1,5 @@
 import rclpy
+import math
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
 from rclpy.executors import ExternalShutdownException
@@ -6,6 +7,9 @@ from enum import Enum, auto
 from moment_orchestration.perception_client import PerceptionClient
 from moment_orchestration.navigation_client import NavigationClient
 from moment_orchestration.manipulation_client import ManipulationClient
+from tf2_ros import Buffer, TransformListener, TransformException # type: ignore
+from rclpy.duration import Duration
+from rclpy.time import Time
 
 
 class MissionState(Enum):
@@ -76,6 +80,12 @@ class OrchestratorNode(Node):
         self.get_logger().info('Manipulation client initialized.')
 
         self.get_logger().info('MOMENT Orchestrator initialized.')
+        
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(
+            self.tf_buffer,
+            self
+        )
         
         self.start_timer = self.create_timer(
             2.0,
@@ -520,6 +530,51 @@ class OrchestratorNode(Node):
                 'Failed to send navigation goal to home.'
             )
             self.set_state(MissionState.ERROR)
+
+
+    def calculate_approach_goal(self, forward_distance):
+
+        try:
+            transform = self.tf_buffer.lookup_transform(
+                self.get_parameter('global_frame').value,
+                self.get_parameter('robot_frame').value,
+                Time(),
+                timeout=Duration(seconds=2.0)
+            )
+
+        except TransformException as error:
+            self.get_logger().error(
+                f'Could not get robot pose: {error}'
+            )
+            return None
+
+        robot_x = transform.transform.translation.x
+        robot_y = transform.transform.translation.y
+
+        orientation = transform.transform.rotation
+
+        # Extract robot yaw from quaternion
+        siny_cosp = 2.0 * (
+            orientation.w * orientation.z
+            + orientation.x * orientation.y
+        )
+
+        cosy_cosp = 1.0 - 2.0 * (
+            orientation.y ** 2
+            + orientation.z ** 2
+        )
+
+        robot_yaw = math.atan2(siny_cosp, cosy_cosp)
+
+        # Calculate forward displacement in map frame
+        goal_x = robot_x + forward_distance * math.cos(robot_yaw)
+        goal_y = robot_y + forward_distance * math.sin(robot_yaw)
+
+        return {
+            'x': goal_x,
+            'y': goal_y,
+            'yaw': robot_yaw
+        }
 
 
 def main(args=None):
