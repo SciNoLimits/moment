@@ -647,8 +647,6 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Object is within the preferred picking distance.'
             )
-
-            self.set_state(MissionState.PICK_OBJECT)
             self.pick_object()
             
             
