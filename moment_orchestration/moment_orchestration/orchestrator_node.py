@@ -1,3 +1,5 @@
+from turtle import delay
+
 import rclpy
 import math
 from rclpy.node import Node
@@ -256,6 +258,8 @@ class OrchestratorNode(Node):
         
         
     def navigation_result_callback(self, future):
+        
+        object_detector_delay = self.get_parameter('object_detector_delay').value
 
         try:
             result = future.result()
@@ -286,13 +290,21 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully reached home.'
             )
-            self.detect_objects()
+            self.create_timer(
+                object_detector_delay, # type: ignore
+                self.detect_objects,
+                callback_group=self.default_callback_group
+            )
             
         elif self.current_state == MissionState.APPROACH_OBJECT:
             self.get_logger().info(
                 'Approach completed. Detecting objects again...'
             )
-            self.detect_objects()
+            self.create_timer(
+                object_detector_delay, # type: ignore
+                self.detect_objects,
+                callback_group=self.default_callback_group
+            )
 
         elif self.current_state == MissionState.NAVIGATE_TO_BAY:
 
@@ -306,7 +318,11 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully returned home.'
             )
-            self.detect_objects()
+            self.create_timer(
+                object_detector_delay, # type: ignore
+                self.detect_objects,
+                callback_group=self.default_callback_group
+            )
 
 
     def identify_object(self):
