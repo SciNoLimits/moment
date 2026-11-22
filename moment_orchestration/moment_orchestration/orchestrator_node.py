@@ -60,7 +60,7 @@ class OrchestratorNode(Node):
                 ('preferred_pick_x', 0.200),
                 ('approach_tolerance', 0.08),
                 
-                ('object_detector_delay', 1.0),
+                ('object_detector_delay', 3.0),
             ]
         )
 

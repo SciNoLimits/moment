@@ -39,4 +39,4 @@ orchestrator_node:
     approach_tolerance: 0.08
 
     # Delay for detecting object
-    object_detector_delay: 1.0
+    object_detector_delay: 3.0
