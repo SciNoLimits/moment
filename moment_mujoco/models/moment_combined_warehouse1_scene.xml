@@ -2,7 +2,7 @@
 <mujoco model="moment_combined_warehouse_scene">
   <statistic center="0 0.48 0.3" extent="9"/>
 
-  <option integrator="implicitfast"/>
+  <option timestep="0.001" integrator="implicitfast" cone="elliptic" impratio="10" noslip_iterations="5"/>
 
   <visual>
     <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
@@ -11,6 +11,9 @@
   </visual>
 
   <default>
+    <default class="collision">
+      <geom contype="1" conaffinity="1" condim="3"/>
+    </default>
     <default class="warehouse_wall">
       <geom type="box" rgba="0.62 0.62 0.64 1" group="1"/>
     </default>
@@ -70,7 +73,7 @@
 
     <!-- Open-top sorting bins, 28 cm square and 11 cm tall. -->
     <body name="red_bay" pos="-4.5 4.70 0">
-      <geom name="bin_red_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.85 0.15 0.15 1"/>
+      <geom name="bin_red_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.92 0.80 0.27 1"/>
       <geom name="bin_red_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.85 0.15 0.15 1"/>
       <geom name="bin_red_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.85 0.15 0.15 1"/>
       <geom name="bin_red_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.85 0.15 0.15 1"/>
@@ -78,7 +81,7 @@
       <site name="R" pos="0 0 0.015" size="0.055" rgba="1 1 1 0"/>
     </body>
     <body name="green_bay" pos="0 4.70 0">
-      <geom name="bin_green_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.15 0.7 0.25 1"/>
+      <geom name="bin_green_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.92 0.80 0.27 1"/>
       <geom name="bin_green_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.7 0.25 1"/>
       <geom name="bin_green_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.7 0.25 1"/>
       <geom name="bin_green_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.15 0.7 0.25 1"/>
@@ -86,7 +89,7 @@
       <site name="G" pos="0 0 0.015" size="0.055" rgba="1 1 1 0"/>
     </body>
     <body name="blue_bay" pos="4.5 4.70 0">
-      <geom name="bin_blue_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.15 0.3 0.85 1"/>
+      <geom name="bin_blue_base" type="box" pos="0 0 0.005" size="0.14 0.14 0.005" rgba="0.92 0.80 0.27 1"/>
       <geom name="bin_blue_wall_n" type="box" pos="0 0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.3 0.85 1"/>
       <geom name="bin_blue_wall_s" type="box" pos="0 -0.135 0.06" size="0.14 0.005 0.05" rgba="0.15 0.3 0.85 1"/>
       <geom name="bin_blue_wall_e" type="box" pos="0.135 0 0.06" size="0.005 0.13 0.05" rgba="0.15 0.3 0.85 1"/>
@@ -105,30 +108,37 @@
     <!-- Pickup tray centred 0.50 m along +X from the robot spawn.
          The tray is fixed. Its inner surface is at z = 0.032 m. -->
     <body name="pickup_tray" pos="0.50 -3.7 0" childclass="pickup_tray">
-      <geom name="pickup_tray_foot_left" pos="0 0.10 0.006" size="0.075 0.015 0.006"/>
-      <geom name="pickup_tray_foot_right" pos="0 -0.10 0.006" size="0.075 0.015 0.006"/>
-      <geom name="pickup_tray_base" pos="0 0 0.022" size="0.105 0.155 0.010"/>
-      <geom name="pickup_tray_rim_front" pos="0.100 0 0.039" size="0.005 0.155 0.007"/>
-      <geom name="pickup_tray_rim_back" pos="-0.100 0 0.039" size="0.005 0.155 0.007"/>
-      <geom name="pickup_tray_rim_left" pos="0 0.150 0.039" size="0.095 0.005 0.007"/>
-      <geom name="pickup_tray_rim_right" pos="0 -0.150 0.039" size="0.095 0.005 0.007"/>
+      <geom name="pickup_tray_foot_left" pos="0 0.10 0.025" size="0.075 0.015 0.05"/>
+      <geom name="pickup_tray_foot_right" pos="0 -0.10 0.025" size="0.075 0.015 0.05"/>
+      <geom name="pickup_tray_base" pos="0 0 0.072" size="0.105 0.155 0.005"/>
+      <!-- <geom name="pickup_tray_rim_front" pos="0.100 0 0.081" size="0.005 0.155 0.004"/>
+      <geom name="pickup_tray_rim_back" pos="-0.100 0 0.081" size="0.005 0.155 0.004"/>
+      <geom name="pickup_tray_rim_left" pos="0 0.150 0.081" size="0.095 0.005 0.004"/>
+      <geom name="pickup_tray_rim_right" pos="0 -0.150 0.081" size="0.095 0.005 0.004"/> -->
     </body>
 
     <!-- Each 35 mm cube has its own free joint for grasping. -->
-    <body name="cube_red_01" pos="0.50 -3.615 0.050">
+    <body name="cube_red_01" pos="0.55 -3.7 0.1">
       <freejoint name="cube_red_01_joint"/>
-      <geom name="cube_red_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" mass="0.02" rgba="0.85 0.15 0.15 1"/>
+      <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
+      <geom name="cube_red_01_geom" type="box" size="0.0175 0.0175 0.0175" rgba="0.85 0.15 0.15 1" friction="5.0 1.5 1.5" condim="3" class="collision"/>
     </body>
-    <body name="cube_green_01" pos="0.50 -3.7 0.050">
+    <body name="cube_green_01" pos="0.5 -3.7 0.1">
       <freejoint name="cube_green_01_joint"/>
-      <geom name="cube_green_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" mass="0.02" rgba="0.15 0.7 0.25 1"/>
+      <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
+      <geom name="cube_green_01_geom" type="box" size="0.0175 0.0175 0.0175" rgba="0.15 0.7 0.25 1" friction="5.0 1.5 1.5" condim="3" class="collision"/>
     </body>
-    <body name="cube_blue_01" pos="0.50 -3.785 0.050">
+    <body name="cube_blue_01" pos="0.45 -3.7 0.1">
       <freejoint name="cube_blue_01_joint"/>
-      <geom name="cube_blue_01_geom" class="item" type="box" size="0.0175 0.0175 0.0175" mass="0.02" rgba="0.15 0.3 0.85 1"/>
+      <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
+      <geom name="cube_blue_01_geom" type="box" size="0.0175 0.0175 0.0175" rgba="0.15 0.3 0.85 1" friction="5.0 1.5 1.5" condim="3" class="collision"/>
     </body>
-
-    <frame pos="0 -3.7 0">
+    <!-- <body name="pick_object" pos="0 0 0.1">
+      <freejoint name="pick_object_free" />
+      <inertial pos="0 0 0" mass="0.05" diaginertia="1.2e-5 1.2e-5 1.2e-5" />
+      <geom name="pick_object_geom" type="box" size="0.018 0.018 0.018" rgba="0.15 0.65 0.95 1" friction="1.2 0.1 0.1" condim="3" />
+    </body> -->
+    <frame pos="0.20 -3.7 0">
       <attach model="moment" body="base_footprint" prefix=""/>
     </frame>
   </worldbody>

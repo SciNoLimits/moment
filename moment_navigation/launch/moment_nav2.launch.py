@@ -4,14 +4,22 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch_ros.actions import Node
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, TimerAction
+from launch.actions import IncludeLaunchDescription, TimerAction, DeclareLaunchArgument
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration
 
 
 def generate_launch_description():
 
     nav2_bringup_dir = get_package_share_directory('nav2_bringup')
     moment_navigation_dir = get_package_share_directory('moment_navigation')
+    
+    rviz_arg = DeclareLaunchArgument(
+        'rviz',
+        default_value='False',
+        description='Launch RViz if True'
+    )
     
     nav2_rviz_config = os.path.join(
         moment_navigation_dir,
@@ -49,16 +57,27 @@ def generate_launch_description():
     )
     
     rviz2 = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
         output='screen',
         arguments=['-d', nav2_rviz_config],
-        parameters=[{'use_sim_time': True}]
-        
+        parameters=[{'use_sim_time': True}],
+        condition=IfCondition(LaunchConfiguration('rviz'))
+    )
+    
+    go_to_goal_node = Node(
+        package='moment_navigation',
+        executable='go_to_goal',
+        name='go_to_goal_server',
+        output='screen'
     )
 
     return LaunchDescription([
+        rviz_arg,
         nav2_launch,
-        TimerAction(period=3.0, actions=[rviz2])
+        TimerAction(
+            period=3.0,
+            actions=[rviz2, go_to_goal_node]
+        )
     ])

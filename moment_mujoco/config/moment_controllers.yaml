@@ -8,8 +8,16 @@ controller_manager:
     diff_drive_controller:
       type: diff_drive_controller/DiffDriveController
 
-    arm_position_controller:
-      type: forward_command_controller/ForwardCommandController
+    # arm_position_controller:
+    #   type: forward_command_controller/ForwardCommandController
+
+    moment_arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+
+    moment_gripper_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
 
     imu_sensor_broadcaster:
       type: imu_sensor_broadcaster/IMUSensorBroadcaster
@@ -70,15 +78,39 @@ diff_drive_controller:
     angular.z.max_jerk: .nan
     angular.z.min_jerk: .nan
 
-arm_position_controller:
+# arm_position_controller:
+#   ros__parameters:
+#     interface_name: position
+#     joints:
+#       - joint1
+#       - joint2
+#       - joint3
+#       - joint4
+#       - gripper_left_joint
+
+moment_arm_controller:
   ros__parameters:
-    interface_name: position
     joints:
       - joint1
       - joint2
       - joint3
       - joint4
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    allow_nonzero_velocity_at_trajectory_end: true
+moment_gripper_controller:
+  ros__parameters:
+    joints:
       - gripper_left_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    allow_nonzero_velocity_at_trajectory_end: true
 
 imu_sensor_broadcaster:
   ros__parameters:
