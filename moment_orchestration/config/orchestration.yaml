@@ -35,5 +35,5 @@ orchestrator_node:
     pick_z_offset: 0.089
 
     # Approach distance to cube before picking
-    preferred_pick_x: 0.240 # Max range is within 0.30
+    preferred_pick_x: 0.255 # Max range is within 0.30
     approach_tolerance: 0.08
