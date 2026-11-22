@@ -55,6 +55,9 @@ class OrchestratorNode(Node):
                 ('robot_frame', 'base_footprint'),
                 
                 ('pick_z_offset', 0.089),
+                
+                ('preferred_pick_x', 0.252),
+                ('approach_tolerance', 0.02)
             ]
         )
 
@@ -86,6 +89,9 @@ class OrchestratorNode(Node):
             self.tf_buffer,
             self
         )
+        
+        self.target_color = None
+        self.approach_pending = False
         
         self.start_timer = self.create_timer(
             2.0,
@@ -536,8 +542,8 @@ class OrchestratorNode(Node):
 
         try:
             transform = self.tf_buffer.lookup_transform(
-                self.get_parameter('global_frame').value,
-                self.get_parameter('robot_frame').value,
+                self.get_parameter('global_frame').value, # type: ignore
+                self.get_parameter('robot_frame').value, # type: ignore
                 Time(),
                 timeout=Duration(seconds=2.0)
             )
