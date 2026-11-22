@@ -108,7 +108,7 @@ ros2 action send_goal /go_to_goal \
       },
       pose: {
         position: {
-          x: 3.72,
+          x: 3.735,
           y: 8.6,
           z: 0.0
         },
