@@ -246,6 +246,14 @@ class OrchestratorNode(Node):
             )
 
             self.place_object()
+            
+        elif self.current_state == MissionState.RETURN_HOME:
+
+            self.get_logger().info(
+                'Successfully returned home.'
+            )
+
+            self.detect_objects()
 
 
     def identify_object(self):
@@ -489,6 +497,28 @@ class OrchestratorNode(Node):
         self.get_logger().info(
             f"Place successful: {result.result.message}"
         )
+        
+        self.return_home()
+
+
+    def return_home(self):
+
+        self.set_state(MissionState.RETURN_HOME)
+
+        home = self.get_waypoint('home')
+
+        success = self.navigation.navigate_to(
+            home['x'],
+            home['y'],
+            home['yaw'],
+            self.navigation_goal_callback
+        )
+
+        if not success:
+            self.get_logger().error(
+                'Failed to send navigation goal to home.'
+            )
+            self.set_state(MissionState.ERROR)
 
 
 def main(args=None):
