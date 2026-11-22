@@ -253,7 +253,12 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully reached home.'
             )
-
+            self.detect_objects()
+            
+        elif self.current_state == MissionState.APPROACH_OBJECT:
+            self.get_logger().info(
+                'Approach completed. Detecting objects again...'
+            )
             self.detect_objects()
 
         elif self.current_state == MissionState.NAVIGATE_TO_BAY:
@@ -261,7 +266,6 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully reached destination bay.'
             )
-
             self.place_object()
             
         elif self.current_state == MissionState.RETURN_HOME:
@@ -269,7 +273,6 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully returned home.'
             )
-
             self.detect_objects()
 
 
@@ -305,7 +308,9 @@ class OrchestratorNode(Node):
             f"yaw={self.destination['yaw']}"
         )
 
-        self.pick_object()
+        self.target_color = color
+
+        self.approach_or_pick()
 
 
     def pick_object(self):
@@ -581,6 +586,69 @@ class OrchestratorNode(Node):
             'y': goal_y,
             'yaw': robot_yaw
         }
+        
+        
+    def approach_or_pick(self):
+
+        object_x = self.detected_object['position']['x'] # type: ignore
+
+        preferred_pick_x = self.get_parameter(
+            'preferred_pick_x'
+        ).value
+
+        tolerance = self.get_parameter(
+            'approach_tolerance'
+        ).value
+
+        forward_distance = object_x - preferred_pick_x
+
+        if forward_distance > tolerance:
+            self.get_logger().info(
+                f'Object is {object_x:.3f} m ahead. '
+                f'Robot needs to approach by {forward_distance:.3f} m.'
+            )
+
+            self.approach_object(forward_distance)
+
+        else:
+            self.get_logger().info(
+                'Object is within the preferred picking distance.'
+            )
+
+            self.set_state(MissionState.PICK_OBJECT)
+            self.pick_object()
+            
+            
+    def approach_object(self, forward_distance):
+
+        approach_goal = self.calculate_approach_goal(
+            forward_distance
+        )
+
+        if approach_goal is None:
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.approach_pending = True
+
+        self.set_state(MissionState.APPROACH_OBJECT)
+
+        self.get_logger().info(
+            f'Approaching object: '
+            f'x={approach_goal["x"]:.3f}, '
+            f'y={approach_goal["y"]:.3f}'
+        )
+
+        goal_sent = self.navigation.navigate_to(
+            approach_goal['x'],
+            approach_goal['y'],
+            approach_goal['yaw'],
+            self.navigation_goal_callback
+        )
+
+        if not goal_sent:
+            self.approach_pending = False
+            self.set_state(MissionState.ERROR)
 
 
 def main(args=None):
