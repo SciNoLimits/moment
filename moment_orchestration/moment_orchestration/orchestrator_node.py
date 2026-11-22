@@ -140,6 +140,37 @@ class OrchestratorNode(Node):
             return
 
         self.detected_objects = self.perception.parse_response(response)
+        
+        # Handle refreshed perception after approaching an object
+        if self.approach_pending:
+
+            matching_objects = [
+                obj for obj in self.detected_objects
+                if obj['color'] == self.target_color
+            ]
+
+            if not matching_objects:
+                self.get_logger().error(
+                    f'Could not detect the target {self.target_color} cube '
+                    'after approaching.'
+                )
+                self.approach_pending = False
+                self.set_state(MissionState.ERROR)
+                return
+
+            # Update the target with its latest position
+            self.detected_object = matching_objects[0]
+
+            self.approach_pending = False
+
+            self.get_logger().info(
+                f'Redetected {self.target_color} cube: '
+                f'{self.detected_object["position"]}'
+            )
+
+            self.set_state(MissionState.PICK_OBJECT)
+            self.pick_object()
+            return
 
         if not self.detected_objects:
             self.get_logger().info(
