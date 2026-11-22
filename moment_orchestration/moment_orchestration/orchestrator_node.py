@@ -13,6 +13,7 @@ class MissionState(Enum):
     NAVIGATE_HOME = auto()
     DETECT_OBJECTS = auto()
     IDENTIFY_OBJECT = auto()
+    APPROACH_OBJECT = auto()
     PICK_OBJECT = auto()
     NAVIGATE_TO_BAY = auto()
     PLACE_OBJECT = auto()
