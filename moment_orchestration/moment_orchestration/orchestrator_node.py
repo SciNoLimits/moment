@@ -583,7 +583,7 @@ class OrchestratorNode(Node):
                 self.get_parameter('global_frame').value, # type: ignore
                 self.get_parameter('robot_frame').value, # type: ignore
                 Time(),
-                timeout=Duration(seconds=2.0)
+                timeout=Duration(seconds=3.0)
             )
 
         except TransformException as error:
