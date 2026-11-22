@@ -56,7 +56,7 @@ class OrchestratorNode(Node):
                 
                 ('pick_z_offset', 0.089),
                 
-                ('preferred_pick_x', 0.252),
+                ('preferred_pick_x', 0.230),
                 ('approach_tolerance', 0.02)
             ]
         )
@@ -435,7 +435,9 @@ class OrchestratorNode(Node):
 
         if result.status != 4:
             self.get_logger().error(
-                f'Pick action did not succeed. Status: {result.status}'
+                f'Pick action did not succeed. '
+                f'Status: {result.status}. '
+                f'Message: {result.result.message}'
             )
             self.set_state(MissionState.ERROR)
             return
