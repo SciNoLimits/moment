@@ -37,3 +37,6 @@ orchestrator_node:
     # Approach distance to cube before picking
     preferred_pick_x: 0.200 # Max range is within 0.30
     approach_tolerance: 0.08
+
+    # Delay for detecting object
+    object_detector_delay: 1.0

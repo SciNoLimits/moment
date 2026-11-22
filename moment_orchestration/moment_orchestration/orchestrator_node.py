@@ -58,7 +58,9 @@ class OrchestratorNode(Node):
                 ('pick_z_offset', 0.089),
                 
                 ('preferred_pick_x', 0.200),
-                ('approach_tolerance', 0.08)
+                ('approach_tolerance', 0.08),
+                
+                ('object_detector_delay', 1.0),
             ]
         )
 
