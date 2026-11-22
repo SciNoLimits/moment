@@ -56,7 +56,7 @@ class OrchestratorNode(Node):
                 
                 ('pick_z_offset', 0.089),
                 
-                ('preferred_pick_x', 0.235),
+                ('preferred_pick_x', 0.240),
                 ('approach_tolerance', 0.08)
             ]
         )
