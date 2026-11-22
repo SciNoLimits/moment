@@ -111,9 +111,9 @@
       <geom name="pickup_tray_foot_left" pos="0 0.10 0.025" size="0.075 0.015 0.05"/>
       <geom name="pickup_tray_foot_right" pos="0 -0.10 0.025" size="0.075 0.015 0.05"/>
       <geom name="pickup_tray_base" pos="0 0 0.072" size="0.105 0.155 0.005"/>
-      <geom name="pickup_tray_rim_front" pos="0.100 0 0.081" size="0.005 0.155 0.04"/>
-      <geom name="pickup_tray_rim_left" pos="0 0.150 0.081" size="0.095 0.005 0.04"/>
-      <geom name="pickup_tray_rim_right" pos="0 -0.150 0.081" size="0.095 0.005 0.04"/> 
+      <geom name="pickup_tray_rim_front" pos="0.100 0 0.086" size="0.005 0.155 0.08"/>
+      <geom name="pickup_tray_rim_left" pos="0 0.150 0.086" size="0.1 0.005 0.08"/>
+      <geom name="pickup_tray_rim_right" pos="0 -0.150 0.086" size="0.1 0.005 0.8"/> 
       <!-- <geom name="pickup_tray_rim_back" pos="-0.100 0 0.081" size="0.005 0.155 0.004"/> -->
     </body>
 
