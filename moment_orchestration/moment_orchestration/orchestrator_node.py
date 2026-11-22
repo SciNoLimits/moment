@@ -10,6 +10,7 @@ from moment_orchestration.manipulation_client import ManipulationClient
 from tf2_ros import Buffer, TransformListener, TransformException # type: ignore
 from rclpy.duration import Duration
 from rclpy.time import Time
+from rclpy.clock import ClockType
 
 
 class MissionState(Enum):
@@ -582,7 +583,10 @@ class OrchestratorNode(Node):
             transform = self.tf_buffer.lookup_transform(
                 self.get_parameter('global_frame').value, # type: ignore
                 self.get_parameter('robot_frame').value, # type: ignore
-                Time(),
+                Time(
+                    nanoseconds=0,
+                    clock_type=ClockType.ROS_TIME
+                ),
                 timeout=Duration(seconds=3.0)
             )
 
