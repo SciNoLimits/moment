@@ -2,7 +2,7 @@ import rclpy
 import math
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
-from rclpy.executors import ExternalShutdownException
+from rclpy.executors import ExternalShutdownException, MultiThreadedExecutor
 from enum import Enum, auto
 from moment_orchestration.perception_client import PerceptionClient
 from moment_orchestration.navigation_client import NavigationClient
@@ -691,12 +691,19 @@ def main(args=None):
 
     node = OrchestratorNode(name='orchestrator_node')
 
+    executor = MultiThreadedExecutor(num_threads=2)
+    executor.add_node(node)
+
     try:
-        rclpy.spin(node)
+        executor.spin()
+
     except (KeyboardInterrupt, ExternalShutdownException):
         pass
+
     finally:
+        executor.shutdown()
         node.destroy_node()
+
         if rclpy.ok():
             rclpy.shutdown()
 
