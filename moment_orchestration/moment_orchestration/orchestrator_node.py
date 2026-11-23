@@ -146,6 +146,18 @@ class OrchestratorNode(Node):
 
         self.detected_objects = self.perception.parse_response(response)
         
+        # self.get_logger().info(
+        #     f'Raw perception response: {response.message}'
+        # )
+
+        # self.get_logger().info(
+        #     f'Parsed objects: {self.detected_objects}'
+        # )
+
+        # self.get_logger().info(
+        #     f'Target color: {self.target_color}'
+        # )
+        
         # Handle refreshed perception after approaching an object
         if self.approach_pending:
 
