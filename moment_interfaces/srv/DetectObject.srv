@@ -1,0 +1,13 @@
+# Ask moment_perception where an object of one colour is.
+# Served by color_detector on /perception/detect_object.
+
+# Request
+string color                      # "red", "green" or "blue"
+---
+# Response
+bool found                        # false: not visible, unknown colour, or no fresh camera image
+geometry_msgs/PoseStamped pose    # object CENTRE; frame in pose.header.frame_id (default base_footprint);
+                                  # orientation is always identity (rotation is not measured)
+bool partial                      # true: object touches the image border and may be cut off;
+                                  # position can be off by ~1 cm -> face the object and ask again
+string message                    # human-readable status, e.g. "red 0.4989 0.0975 0.0200 base_footprint"
