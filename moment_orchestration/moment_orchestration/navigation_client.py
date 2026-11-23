@@ -17,7 +17,7 @@ class NavigationClient:
                 'Waiting for navigation action server...'
             )
 
-            if not self.client.wait_for_server(timeout_sec=1.0):
+            if not self.client.wait_for_server(timeout_sec=3.0):
                 self.node.get_logger().warning(
                     'Navigation action server is unavailable.'
                 )

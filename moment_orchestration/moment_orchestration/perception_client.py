@@ -13,7 +13,7 @@ class PerceptionClient:
                 'Waiting for perception service...'
             )
 
-            if not self.client.wait_for_service(timeout_sec=1.0):
+            if not self.client.wait_for_service(timeout_sec=5.0):
                 self.node.get_logger().warning(
                     'Perception service is unavailable.'
                 )

@@ -21,7 +21,7 @@ orchestrator_node:
 
     # Blue cube destination
     blue_bay:
-      x: 3.72
+      x: 3.735
       y: 8.6
       yaw: 0.0
 
@@ -31,5 +31,12 @@ orchestrator_node:
     # Perception and manipulation frame
     robot_frame: "base_footprint"
 
-    # Declare the pick height offset
+    # Pick height offset
     pick_z_offset: 0.089
+
+    # Approach distance to cube before picking
+    preferred_pick_x: 0.200 # Max range is within 0.30
+    approach_tolerance: 0.08
+
+    # Delay for detecting object
+    object_detector_delay: 3.0

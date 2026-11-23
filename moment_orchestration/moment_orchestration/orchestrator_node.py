@@ -1,11 +1,16 @@
 import rclpy
+import math
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped
-from rclpy.executors import ExternalShutdownException
+from rclpy.executors import ExternalShutdownException, MultiThreadedExecutor
 from enum import Enum, auto
 from moment_orchestration.perception_client import PerceptionClient
 from moment_orchestration.navigation_client import NavigationClient
 from moment_orchestration.manipulation_client import ManipulationClient
+from tf2_ros import Buffer, TransformListener, TransformException # type: ignore
+from rclpy.duration import Duration
+from rclpy.time import Time
+from rclpy.clock import ClockType
 
 
 class MissionState(Enum):
@@ -13,6 +18,7 @@ class MissionState(Enum):
     NAVIGATE_HOME = auto()
     DETECT_OBJECTS = auto()
     IDENTIFY_OBJECT = auto()
+    APPROACH_OBJECT = auto()
     PICK_OBJECT = auto()
     NAVIGATE_TO_BAY = auto()
     PLACE_OBJECT = auto()
@@ -42,7 +48,7 @@ class OrchestratorNode(Node):
                 ('green_bay.y', 8.10),
                 ('green_bay.yaw', 1.57079632679),
 
-                ('blue_bay.x', 3.72),
+                ('blue_bay.x', 3.735),
                 ('blue_bay.y', 8.6),
                 ('blue_bay.yaw', 0.0),
 
@@ -50,6 +56,11 @@ class OrchestratorNode(Node):
                 ('robot_frame', 'base_footprint'),
                 
                 ('pick_z_offset', 0.089),
+                
+                ('preferred_pick_x', 0.200),
+                ('approach_tolerance', 0.08),
+                
+                ('object_detector_delay', 3.0),
             ]
         )
 
@@ -75,6 +86,17 @@ class OrchestratorNode(Node):
         self.get_logger().info('Manipulation client initialized.')
 
         self.get_logger().info('MOMENT Orchestrator initialized.')
+        
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(
+            self.tf_buffer,
+            self
+        )
+        
+        self.target_color = None
+        self.approach_pending = False
+        self.approach_pending = False
+        self.detection_timer = None
         
         self.start_timer = self.create_timer(
             2.0,
@@ -123,6 +145,48 @@ class OrchestratorNode(Node):
             return
 
         self.detected_objects = self.perception.parse_response(response)
+        
+        # self.get_logger().info(
+        #     f'Raw perception response: {response.message}'
+        # )
+
+        # self.get_logger().info(
+        #     f'Parsed objects: {self.detected_objects}'
+        # )
+
+        # self.get_logger().info(
+        #     f'Target color: {self.target_color}'
+        # )
+        
+        # Handle refreshed perception after approaching an object
+        if self.approach_pending:
+
+            matching_objects = [
+                obj for obj in self.detected_objects
+                if obj['color'] == self.target_color
+            ]
+
+            if not matching_objects:
+                self.get_logger().error(
+                    f'Could not detect the target {self.target_color} cube '
+                    'after approaching.'
+                )
+                self.approach_pending = False
+                self.set_state(MissionState.ERROR)
+                return
+
+            # Update the target with its latest position
+            self.detected_object = matching_objects[0]
+
+            self.approach_pending = False
+
+            self.get_logger().info(
+                f'Redetected {self.target_color} cube: '
+                f'{self.detected_object["position"]}'
+            )
+
+            self.pick_object()
+            return
 
         if not self.detected_objects:
             self.get_logger().info(
@@ -206,6 +270,8 @@ class OrchestratorNode(Node):
         
         
     def navigation_result_callback(self, future):
+        
+        object_detector_delay = self.get_parameter('object_detector_delay').value
 
         try:
             result = future.result()
@@ -236,15 +302,19 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully reached home.'
             )
-
-            self.detect_objects()
+            self.schedule_detection()
+            
+        elif self.current_state == MissionState.APPROACH_OBJECT:
+            self.get_logger().info(
+                'Approach completed. Detecting objects again...'
+            )
+            self.schedule_detection()
 
         elif self.current_state == MissionState.NAVIGATE_TO_BAY:
 
             self.get_logger().info(
                 'Successfully reached destination bay.'
             )
-
             self.place_object()
             
         elif self.current_state == MissionState.RETURN_HOME:
@@ -252,8 +322,7 @@ class OrchestratorNode(Node):
             self.get_logger().info(
                 'Successfully returned home.'
             )
-
-            self.detect_objects()
+            self.schedule_detection()
 
 
     def identify_object(self):
@@ -288,7 +357,9 @@ class OrchestratorNode(Node):
             f"yaw={self.destination['yaw']}"
         )
 
-        self.pick_object()
+        self.target_color = color
+
+        self.approach_or_pick()
 
 
     def pick_object(self):
@@ -382,7 +453,9 @@ class OrchestratorNode(Node):
 
         if result.status != 4:
             self.get_logger().error(
-                f'Pick action did not succeed. Status: {result.status}'
+                f'Pick action did not succeed. '
+                f'Status: {result.status}. '
+                f'Message: {result.result.message}'
             )
             self.set_state(MissionState.ERROR)
             return
@@ -521,17 +594,159 @@ class OrchestratorNode(Node):
             self.set_state(MissionState.ERROR)
 
 
+    def calculate_approach_goal(self, forward_distance):
+
+        try:
+            transform = self.tf_buffer.lookup_transform(
+                self.get_parameter('global_frame').value, # type: ignore
+                self.get_parameter('robot_frame').value, # type: ignore
+                Time(
+                    nanoseconds=0,
+                    clock_type=ClockType.ROS_TIME
+                ),
+                timeout=Duration(seconds=3.0)
+            )
+
+        except TransformException as error:
+            self.get_logger().error(
+                f'Could not get robot pose: {error}'
+            )
+            return None
+
+        robot_x = transform.transform.translation.x
+        robot_y = transform.transform.translation.y
+
+        orientation = transform.transform.rotation
+
+        # Extract robot yaw from quaternion
+        siny_cosp = 2.0 * (
+            orientation.w * orientation.z
+            + orientation.x * orientation.y
+        )
+
+        cosy_cosp = 1.0 - 2.0 * (
+            orientation.y ** 2
+            + orientation.z ** 2
+        )
+
+        robot_yaw = math.atan2(siny_cosp, cosy_cosp)
+
+        # Calculate forward displacement in map frame
+        goal_x = robot_x + forward_distance * math.cos(robot_yaw)
+        goal_y = robot_y + forward_distance * math.sin(robot_yaw)
+
+        return {
+            'x': goal_x,
+            'y': goal_y,
+            'yaw': robot_yaw
+        }
+        
+        
+    def approach_or_pick(self):
+
+        object_x = self.detected_object['position']['x'] # type: ignore
+
+        preferred_pick_x = self.get_parameter(
+            'preferred_pick_x'
+        ).value
+
+        tolerance = self.get_parameter(
+            'approach_tolerance'
+        ).value
+
+        forward_distance = object_x - preferred_pick_x
+
+        if forward_distance > tolerance:
+            self.get_logger().info(
+                f'Object is {object_x:.3f} m ahead. '
+                f'Robot needs to approach by {forward_distance:.3f} m.'
+            )
+
+            self.approach_object(forward_distance)
+
+        else:
+            self.get_logger().info(
+                'Object is within the preferred picking distance.'
+            )
+            self.pick_object()
+            
+            
+    def approach_object(self, forward_distance):
+
+        approach_goal = self.calculate_approach_goal(
+            forward_distance
+        )
+
+        if approach_goal is None:
+            self.set_state(MissionState.ERROR)
+            return
+
+        self.approach_pending = True
+
+        self.set_state(MissionState.APPROACH_OBJECT)
+
+        self.get_logger().info(
+            f'Approaching object: '
+            f'x={approach_goal["x"]:.3f}, '
+            f'y={approach_goal["y"]:.3f}'
+        )
+
+        goal_sent = self.navigation.navigate_to(
+            approach_goal['x'],
+            approach_goal['y'],
+            approach_goal['yaw'],
+            self.navigation_goal_callback
+        )
+
+        if not goal_sent:
+            self.approach_pending = False
+            self.set_state(MissionState.ERROR)
+
+
+    def schedule_detection(self):
+
+        delay = self.get_parameter(
+            'object_detector_delay'
+        ).value
+
+        self.get_logger().info(
+            f'Waiting {delay:.1f} seconds before object detection...'
+        )
+
+        self.detection_timer = self.create_timer(
+            delay, # type: ignore
+            self.delayed_detection,
+            callback_group=self.default_callback_group
+        )
+
+
+    def delayed_detection(self):
+
+        # Cancel the timer to prevent repeated execution
+        self.detection_timer.cancel() # type: ignore
+        self.detection_timer = None
+
+        self.detect_objects()
+
+
 def main(args=None):
     rclpy.init(args=args)
 
     node = OrchestratorNode(name='orchestrator_node')
 
+    executor = MultiThreadedExecutor(num_threads=2)
+    executor.add_node(node)
+
     try:
-        rclpy.spin(node)
+        executor.spin()
+
     except (KeyboardInterrupt, ExternalShutdownException):
         pass
+
     finally:
+        executor.shutdown()
         node.destroy_node()
+
         if rclpy.ok():
             rclpy.shutdown()
 
