@@ -180,3 +180,6 @@ ros2 service call /perception/detect_all std_srvs/srv/Trigger "{}"
     }
   }" \
   --feedback
+
+
+ros2 param get /controller_server general_goal_checker.xy_goal_tolerance
