@@ -71,7 +71,7 @@ class ColorDetectorNode(Node):
         p('max_object_size', 0.08)         # metres; larger blobs are floor zones, walls, bays
         p('output_point', 'center')        # 'center' = cube centre (for grasping), 'surface' = visible surface
         p('cube_size', 0.04)               # metres, edge length
-        p('cube_on_ground', True)          # True: centre z = ground_z + cube_size/2 (exact)
+        p('cube_on_ground', False)          # True: centre z = ground_z + cube_size/2 (exact)
         p('ground_z', 0.0)                 # height of the surface the cubes rest on, in target_frame
         p('max_frame_age', 1.0)            # seconds; older frames are rejected by the services
         p('tf_latest_fallback', False)     # True only if the robot is guaranteed to stand still
